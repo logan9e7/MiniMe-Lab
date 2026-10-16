@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from app.learning import router as learning_router
 from app.science import router as science_router
+from app.discover import router as discover_router
 
 app = FastAPI(title="MiniMe Lab", version="0.1.0")
 origins = [x.strip() for x in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if x.strip()]
@@ -50,3 +51,5 @@ def twins():
 app.include_router(learning_router)
 
 app.include_router(science_router)
+
+app.include_router(discover_router)
