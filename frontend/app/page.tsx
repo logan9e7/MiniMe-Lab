@@ -5,6 +5,7 @@ import TwinScience from "./TwinScience";
 import PeriodPlayground from "./PeriodPlayground";
 import PregnancyJourney from "./PregnancyJourney";
 import DiscoveryCards from "./DiscoveryCards";
+import ScienceLibrary from "./ScienceLibrary";
 const modules=[["🥚","Fertility Lab","Explore estimated ovulation and timing"],["🎂","Birthday Time Machine","Explore illustrative conception dates"],["👯","Twin Universe","Learn why twins happen"],["🌸","Period Explorer","Understand the menstrual cycle"],["🤰","Pregnancy Journey","Explore pregnancy stages"],["💬","No-Awkward-Questions","Reproductive health without stigma"]];
 function offset(s:string,n:number){const d=new Date(s+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
 export default function Home(){const [active,setActive]=useState(0),[cycle,setCycle]=useState(28),[day,setDay]=useState(12),[birthday,setBirthday]=useState("2027-08-15");const ovu=cycle-14,delta=day-ovu;
@@ -18,4 +19,4 @@ return <main className="mx-auto max-w-6xl px-5 py-8"><nav className="flex items-
 {active===3&&<PeriodPlayground/>}
 {active===4&&<PregnancyJourney/>}
 {active===5&&<DiscoveryCards/>}
-</section><footer className="py-12 text-center text-sm text-slate-600">Educational only — not medical advice, contraception or a pregnancy prediction. No data saved by this demo. 💜</footer></main>}
+</section><ScienceLibrary/><footer className="py-12 text-center text-sm text-slate-600">Educational only — not medical advice, contraception or a pregnancy prediction. No data saved by this demo. 💜</footer></main>}
