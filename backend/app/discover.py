@@ -25,7 +25,7 @@ QUESTIONS = [
     {"question": "How does pregnancy develop?", "topic": "pregnancy"},
 ]
 def clean(value):
-    return re.sub(r"\\s+", " ", unescape(re.sub(r"<[^>]+>", " ", value or ""))).strip()
+    return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", value or ""))).strip()
 
 @lru_cache(maxsize=32)
 def medline(topic):
