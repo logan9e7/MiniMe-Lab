@@ -32,3 +32,14 @@ def education():
         {"title": "Twin biology", "summary": "Identical twins originate from one fertilized egg; fraternal twins from two."},
         {"title": "Pregnancy dating", "summary": "Clinical dating commonly starts from the last menstrual period."}
     ]}
+
+@router.get("/twins/guide")
+def twins_guide():
+    return {
+        "types": [
+            {"name": "Identical", "origin": "One fertilized egg divides into two embryos."},
+            {"name": "Fraternal", "origin": "Two separate eggs are fertilized."}
+        ],
+        "personal_probability": None,
+        "notice": "Educational overview only; this API does not estimate individual twin likelihood."
+    }
