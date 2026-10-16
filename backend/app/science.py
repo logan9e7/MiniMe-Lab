@@ -1,4 +1,6 @@
-import json
+from functools import lru_cache
+from html import unescape
+import re
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree
@@ -22,6 +24,7 @@ GENES = {
     "F5": "https://medlineplus.gov/genetics/gene/f5/",
 }
 
+@lru_cache(maxsize=32)
 def fetch_xml(db: str, term: str):
     url = BASE + "?" + urlencode({"db": db, "term": term, "retmax": 8, "tool": "MiniMeLab"})
     req = Request(url, headers={"User-Agent": "MiniMeLab/0.1 (educational project)"})
@@ -41,7 +44,8 @@ def search(topic: str = Query("genetics", min_length=2, max_length=40)):
         root = fetch_xml("healthTopics", term)
         records = []
         for doc in root.findall(".//document"):
-            title = "".join(doc.findtext("./content[@name='title']", default="").split("<"))
+            title_node = doc.find("./content[@name='title']")
+            title = re.sub(r"\\s+", " ", unescape("".join(title_node.itertext()) if title_node is not None else "")).strip()
             url = doc.get("url", "")
             if url.startswith("https://medlineplus.gov/"):
                 records.append({"title": title or term.title(), "url": url, "source": "MedlinePlus / US National Library of Medicine"})
@@ -53,3 +57,20 @@ def search(topic: str = Query("genetics", min_length=2, max_length=40)):
 def genes():
     return {"genes": [{"symbol": symbol, "url": url, "source": "MedlinePlus Genetics"} for symbol, url in GENES.items()],
             "notice": "These are examples for education, not personal genetic testing or risk assessment."}
+
+@router.get("/genetics/search")
+def genetics_search(term: str = Query("chromosomes", min_length=2, max_length=60)):
+    """Search NLM's real genetics index; never infer personal genetic risk."""
+    try:
+        root = fetch_xml("ghr", term)
+        records = []
+        for doc in root.findall(".//document"):
+            url = doc.get("url", "")
+            if not url.startswith("https://medlineplus.gov/genetics/"):
+                continue
+            node = doc.find("./content[@name='title']")
+            title = re.sub(r"\\s+", " ", unescape("".join(node.itertext()) if node is not None else "")).strip()
+            records.append({"title": title or term, "url": url, "source": "MedlinePlus Genetics"})
+        return {"term": term, "results": records, "source": "MedlinePlus Genetics", "notice": "Reference material, not a genetic test or personalized prediction."}
+    except Exception:
+        raise HTTPException(status_code=503, detail="Genetics source temporarily unavailable.")
