@@ -1,0 +1,18 @@
+"use client";
+import {useEffect,useState} from "react";
+const API=process.env.NEXT_PUBLIC_API_URL||"https://minime-lab-api.onrender.com";
+type Question={id:string;question:string;options:string[]};
+type Feedback={correct:boolean;correct_choice:number;explanation:string;source:string};
+const topics=[["genetics","🧬 Genetics"],["twins","👯 Twins"],["fertility","🥚 Fertility"],["pregnancy","🌱 Pregnancy"],["periods","🌸 Periods"],["chromosomes","🔬 Chromosomes"]];
+export default function ScienceQuiz(){
+ const [topic,setTopic]=useState("genetics"),[questions,setQuestions]=useState<Question[]>([]),[index,setIndex]=useState(0),[feedback,setFeedback]=useState<Feedback|null>(null),[selected,setSelected]=useState<number|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState("");
+ useEffect(()=>{const ctrl=new AbortController();setQuestions([]);setIndex(0);setSelected(null);setFeedback(null);setError("");fetch(API+"/api/quiz/"+topic,{signal:ctrl.signal}).then(async r=>{if(!r.ok)throw Error("API unavailable");return r.json()}).then(d=>setQuestions(d.questions||[])).catch(e=>{if(e.name!=="AbortError")setError("Quiz questions are unavailable. Try again soon.")});return()=>ctrl.abort()},[topic]);
+ const question=questions[index];
+ async function choose(i:number){if(!question||feedback||busy)return;setSelected(i);setBusy(true);try{const r=await fetch(API+"/api/quiz/check",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({topic,question_id:question.id,choice:i})});if(!r.ok)throw Error("Check failed");setFeedback(await r.json())}catch{setError("Could not check the answer. Please retry.");setSelected(null)}finally{setBusy(false)}}
+ function next(){setIndex(i=>(i+1)%questions.length);setSelected(null);setFeedback(null);setError("")}
+ return <section className="mt-10 rounded-3xl bg-white p-6 shadow-sm md:p-10"><p className="text-xs font-bold uppercase tracking-widest text-violet-600">🎯 Learn by playing</p><h2 className="mt-3 text-3xl font-black">Science Quiz Arcade</h2><p className="mt-2 text-slate-600">Guess, reveal the explanation, and open the science source. No scores about your health or genetics.</p>
+ <div className="mt-5 flex flex-wrap gap-2">{topics.map(([id,label])=><button key={id} onClick={()=>setTopic(id)} aria-pressed={topic===id} className={"rounded-full px-4 py-2 text-sm font-semibold "+(topic===id?"bg-violet-600 text-white":"bg-lavender")}>{label}</button>)}</div>
+ {question?<div className="mt-6 rounded-3xl bg-lavender p-6"><p className="text-xs font-bold text-violet-700">Question {index+1} of {questions.length}</p><h3 className="mt-3 text-xl font-black">{question.question}</h3><div className="mt-5 grid gap-3">{question.options.map((option,i)=><button key={i} disabled={!!feedback||busy} onClick={()=>void choose(i)} className={"rounded-xl border p-4 text-left font-semibold transition "+(selected===i?"border-violet-600 bg-violet-100":"border-white bg-white hover:border-violet-300")+" disabled:cursor-default"}>{String.fromCharCode(65+i)}. {option}</button>)}</div>
+ {feedback&&<div className="mt-5 rounded-2xl bg-white p-5" aria-live="polite"><p className="text-lg font-black">{feedback.correct?"🎉 You got it!":"💡 New discovery!"}</p><p className="mt-2">{feedback.explanation}</p><a href={feedback.source} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-bold text-violet-700 underline">Read the source ↗</a><div><button onClick={next} className="mt-5 rounded-full bg-violet-600 px-6 py-3 font-bold text-white">Next challenge →</button></div></div>}</div>:<p className="mt-6 text-sm text-slate-600">Loading quiz questions…</p>}
+ {error&&<p role="status" className="mt-4 text-sm text-slate-600">{error}</p>}</section>
+}
