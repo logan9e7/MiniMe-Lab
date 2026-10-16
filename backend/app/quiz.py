@@ -30,7 +30,7 @@ class Submission(BaseModel):
     question_id: str = Field(min_length=2, max_length=20)
     choice: int = Field(ge=0, le=4)
 
-@router.get("/{topic}")
+@router.get("/topics/{topic}")
 def questions(topic: str):
     if topic not in BANK:
         raise HTTPException(404, "Topic not found")
