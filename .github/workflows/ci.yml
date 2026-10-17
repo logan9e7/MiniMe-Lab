@@ -35,3 +35,6 @@ jobs:
       - run: test -f out/privacy.html -o -f out/privacy/index.html
       - run: test -f out/editorial.html -o -f out/editorial/index.html
       - run: grep -q 'Virtual adoption' out/index.html
+      - run: grep -q 'How do families begin?' out/index.html
+      - run: grep -q 'Privacy and data' out/privacy.html || grep -q 'Privacy and data' out/privacy/index.html
+      - run: grep -q 'Our science and learning principles' out/editorial.html || grep -q 'Our science and learning principles' out/editorial/index.html
