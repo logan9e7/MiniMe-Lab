@@ -51,3 +51,9 @@ a{text-underline-offset:3px}
 #family-discovery section[aria-labelledby="parenting-title"] button{transition:background-color .15s,border-color .15s,transform .15s}
 #family-discovery section[aria-labelledby="parenting-title"] button:not(:disabled):hover{border-color:#9274e4}
 @media(max-width:640px){#family-discovery>div[role="group"]>button{min-height:140px}#family-discovery>div[role="group"]+div{border-radius:20px}}
+
+.guide-link{display:block;color:inherit;cursor:pointer;min-height:215px;transition:transform .18s,border-color .18s,box-shadow .18s}
+.guide-link:hover{border-color:#c8b4f6;box-shadow:0 14px 30px #7250b31c;transform:translateY(-4px)}
+.guide-link:focus-visible{outline:3px solid #7858e2;outline-offset:4px}
+.guide-link span:last-child{transition:transform .18s}
+.guide-link:hover span:last-child{transform:translateX(3px)}
