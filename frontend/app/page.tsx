@@ -24,4 +24,4 @@ return <main className="mx-auto max-w-6xl px-5 py-8"><nav className="flex items-
 {active===3&&<PeriodPlayground/>}
 {active===4&&<PregnancyJourney/>}
 {active===5&&<DiscoveryCards/>}
-</section><ScienceLibrary/><footer className="py-12 text-center text-sm text-slate-600">Educational only — not medical advice, contraception or a pregnancy prediction. No data saved by this demo. 💜</footer></main>}
+</section><ScienceLibrary/><footer className="py-12 text-center text-sm text-slate-600">Educational only — not medical advice, contraception or a pregnancy prediction. Family Discovery Arcade answers stay in browser memory. 💜 <span className="mx-2">·</span><a className="underline" href="/privacy/">Privacy</a><span className="mx-2">·</span><a className="underline" href="/editorial/">Science &amp; editorial policy</a></footer></main>}
