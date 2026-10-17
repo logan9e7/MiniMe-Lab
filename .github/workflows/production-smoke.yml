@@ -1,0 +1,16 @@
+name: Production smoke checks
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 7 * * *'
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify live frontend and backend
+        run: node scripts/smoke.mjs
