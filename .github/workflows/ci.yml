@@ -32,3 +32,6 @@ jobs:
       - run: test -f out/index.html
       - run: grep -q 'Genetics Playground' out/index.html
       - run: test -f out/_headers
+      - run: test -f out/privacy/index.html
+      - run: test -f out/editorial/index.html
+      - run: grep -q 'Virtual adoption' out/index.html
