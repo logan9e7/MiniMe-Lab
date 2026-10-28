@@ -7,7 +7,7 @@ export default function HealthEducation(){
  const [consent,setConsent]=useState<Record<number,number>>({});
  const categories=["All",...new Set(methods.map(m=>m.category))];
  const visible=methods.filter(m=>category==="All"||m.category===category);
- const score=mythQuestions.filter((q,i)=>answers[i]===q.answer).length;
+ const score=mythQuestions.filter((q,i)=>Object.prototype.hasOwnProperty.call(answers,i)&&answers[i]===q.answer).length;
  return <div className="space-y-8">
  <section id="contraception" className="rounded-3xl border border-violet-100 bg-white p-5"><h3 className="text-2xl font-black">Compare contraception</h3><p className="mt-2 text-sm text-slate-700">Effectiveness figures describe pregnancy prevention over one year where specified. Typical use includes everyday errors; effectiveness varies by method and use. Condoms also help protect against STIs.</p>
  <label className="mt-4 block text-sm font-semibold">Filter by method<select className="mt-2 w-full rounded-xl border p-3" value={category} onChange={e=>setCategory(e.target.value)}>{categories.map(c=><option key={c}>{c}</option>)}</select></label>
