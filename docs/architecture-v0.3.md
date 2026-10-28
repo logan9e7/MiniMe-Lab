@@ -40,3 +40,22 @@ Legacy feature modules are intentionally retained until migration and regression
 2. Add automated tests for diary validation, cycle interval calculations, storage errors and hydration.
 3. Add optional local encrypted storage and import/export version migration.
 4. Only then implement a separate, permission-gated educational AI interface.
+
+## Safe Sex & Women's Rights (India)
+- `app/safe-sex/page.tsx` is the standalone entry route; `features/safe-sex/SafeSexLab.tsx` is the client-side interactive tab view; `features/safe-sex/content.ts` holds reviewed educational/legal reference cards.
+- Landing-page Safe Sex tab renders the same reusable feature component.
+- This feature does not ask for or persist sexual history, partner information, pregnancy test results, or identity.
+- Sources include WHO family planning/condoms/emergency contraception, CDC HIV PEP, NHS pregnancy tests, Government of India MTP Act and amendment, the 2022 Supreme Court unmarried-women decision, and the Government POSH guide.
+- Indian law is jurisdiction- and fact-specific; re-review sources and links before release and periodically afterward. Legal summaries are not individualized legal advice.
+
+## Frontend extraction status
+- `app/page.tsx` composes feature modules instead of implementing fertility, birthday and twin lab state and calculations inline.
+- Interactive labs live under `features/{fertility,pregnancy,genetics,periods,education,safe-sex}`.
+- Legacy `app/*.tsx` component paths are small compatibility re-exports. They can be removed after a successful build and import audit.
+- Follow-up: split the remaining large `PeriodPlayground` and `FamilyDiscoveryLab` feature components into hooks, presentational sections, and API clients. The current extraction is a first pass, not the final granularity.
+
+## Outstanding release blockers
+- Execute `npm run build` and backend tests in an environment with dependencies and network access.
+- Validate all feature routes and responsive screens; run accessibility checks.
+- Medical and Indian legal review of public guidance before production launch.
+- Confirm live deployment is serving these commits, rather than assuming GitHub commits automatically deploy.
