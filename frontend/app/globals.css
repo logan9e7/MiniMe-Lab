@@ -57,3 +57,27 @@ a{text-underline-offset:3px}
 .guide-link:focus-visible{outline:3px solid #7858e2;outline-offset:4px}
 .guide-link span:last-child{transition:transform .18s}
 .guide-link:hover span:last-child{transform:translateX(3px)}
+
+
+/* Playful Biology v1 — mobile-first product shell */
+:root{--ink:#352a3d;--muted:#66596b;--purple:#62468e;--line:#eadde6;--coral:#e76f65;--peach:#ffe2d5;--butter:#ffe6a5;--lilac:#e5d8ff;--mint:#d9f2e6}
+body{background:radial-gradient(ellipse 850px 460px at 100% 0%,#ffe2d5aa,transparent 74%),radial-gradient(ellipse 650px 450px at 0% 20%,#e5d8ff88,transparent 75%),#fff9f3;color:var(--ink)}
+.app-topbar{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:6px 0 18px}
+.brand-mark{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:900;font-size:1.4rem;letter-spacing:-.04em;color:var(--ink);white-space:nowrap}
+.brand-mark>span:first-child{display:grid;place-items:center;width:46px;height:46px;border-radius:17px;background:var(--peach);color:#9c424b;font-size:1.8rem}
+.brand-mark b{color:var(--purple)}.brand-caption{font-size:.8rem;color:var(--muted)}
+.app-desktop-nav{display:flex;align-items:center;gap:18px}.app-desktop-nav a{font-weight:750;font-size:.875rem;color:#53435c;text-decoration:none;min-height:44px;display:flex;align-items:center}
+.app-desktop-nav a:hover{color:var(--purple);text-decoration:underline}.app-menu-button,.app-bottom-nav{display:none}
+.hero-shell{background:linear-gradient(115deg,#fff0e6,#fff9ed 54%,#f1e8ff);border-color:#f2dcd9}
+.hero-shell:before{background:#ffcaad80}.hero-shell:after{background:#e5d8ffb0}
+.eyebrow,.section-kicker{color:#875075}.pill-primary{background:#b84847;box-shadow:0 8px 22px #b8484730}.pill-primary:hover{background:#9e3b3a}.pill-secondary{color:#553d78;border-color:#e6cddf}
+.biology-art{position:relative;min-height:285px;max-width:360px;width:100%;margin:auto;border-radius:50%;background:radial-gradient(circle at 45% 40%,#fff 0 20%,#ffe5d8 21% 47%,#f5d8ee 48% 70%,transparent 71%);display:grid;place-items:center}
+.biology-core{width:96px;height:96px;border-radius:32px;background:#fff9f1;display:grid;place-items:center;font-size:4rem;color:#a35c94;transform:rotate(-10deg);box-shadow:0 12px 30px #ab7c9933}
+.biology-orbit{position:absolute;display:grid;place-items:center;width:75px;height:75px;border-radius:25px;background:white;box-shadow:0 10px 25px #8a698024;font-size:2.4rem}
+.orbit-one{left:4%;top:10%;color:#df7977}.orbit-two{right:0;top:28%}.orbit-three{left:10%;bottom:12%;color:#a45c8c}
+.biology-art-label{position:absolute;bottom:2px;font-weight:800;font-size:.75rem;letter-spacing:.08em;color:#76536b}
+.quick-action{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-height:154px;border-radius:24px;padding:20px;text-decoration:none;color:var(--ink);border:1px solid #e9dce5;transition:transform .18s,box-shadow .18s}
+.quick-action:hover{transform:translateY(-3px);box-shadow:0 12px 26px #86628020}.quick-action span{font-size:2rem}.quick-action strong{font-size:1.04rem}.quick-action small{font-size:.83rem;color:#66596b;line-height:1.5}
+.action-peach{background:#ffe2d5}.action-mint{background:#d9f2e6}.action-butter{background:#ffe6a5}.action-lilac{background:#e5d8ff}
+@media(max-width:900px){.brand-caption{display:none}.app-desktop-nav{gap:11px}}
+@media(max-width:640px){body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}.app-topbar{padding-bottom:8px}.app-desktop-nav{display:none}.app-desktop-nav.is-open{display:flex;position:absolute;top:73px;left:16px;right:16px;z-index:30;background:white;border:1px solid var(--line);border-radius:22px;padding:14px;flex-direction:column;align-items:stretch;box-shadow:0 14px 30px #352a3d1c}.app-menu-button{display:block;border:1px solid var(--line);background:white;border-radius:14px;padding:10px 14px;font-weight:800;min-height:44px}.app-bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);bottom:0;left:0;right:0;z-index:40;background:#fffaf7f5;border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom));backdrop-filter:blur(14px)}.app-bottom-nav a{min-height:54px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;color:#634d70;text-decoration:none}.app-bottom-nav span{font-size:1.45rem;line-height:1}.app-bottom-nav small{font-size:.68rem;font-weight:800}.biology-art{min-height:210px;max-width:260px}.biology-orbit{width:58px;height:58px;font-size:1.8rem}.biology-core{width:75px;height:75px;font-size:3rem}.quick-action{min-height:135px}.hero-shell{border-radius:26px}}
