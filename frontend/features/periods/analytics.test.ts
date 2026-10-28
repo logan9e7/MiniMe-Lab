@@ -1,0 +1,10 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {cycleMetrics,symptomMetrics,painSeries} from "./analytics.ts";
+import type {PeriodEntry} from "./types.ts";
+const entry=(date:string,periodStart=false,symptoms:string[]=[],pain=0):PeriodEntry=>({date,periodStart,flow:"medium",pain,mood:"neutral",symptoms,notes:"",updatedAt:"2026-01-01T00:00:00Z"});
+test("confirmed starts, missing days and leap year",()=>{const m=cycleMetrics([entry("2024-01-31",true),entry("2024-02-29",true),entry("2024-03-30",true),entry("2024-02-10")]);assert.deepEqual(m.intervals,[29,30]);assert.equal(m.mean,29.5);assert.equal(m.median,29.5);assert.ok(Math.abs((m.sd??0)-Math.sqrt(.5))<1e-9)});
+test("legacy days are not inferred",()=>{assert.equal(cycleMetrics([entry("2026-01-01"),entry("2026-02-01")]).sampleSize,0)});
+test("out of range interval excluded",()=>{const m=cycleMetrics([entry("2026-01-01",true),entry("2026-01-10",true)]);assert.equal(m.excluded,1);assert.equal(m.mean,null)});
+test("symptom denominator is logged days",()=>{const x=symptomMetrics([entry("2026-01-01",false,["Cramps"]),entry("2026-01-02")]);assert.equal(x[0].percent,50);assert.equal(x[0].denominator,2)});
+test("pain series is chronological",()=>{assert.deepEqual(painSeries([entry("2026-01-03",false,[],7),entry("2026-01-01",false,[],2)]).map(x=>x.pain),[2,7])});
