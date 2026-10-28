@@ -60,7 +60,7 @@ def delay(data: DelayInput):
         guidance.append("A positive pregnancy test warrants pregnancy-related follow-up; urgent evaluation is important if pain, bleeding or fainting occurs.")
     elif data.pregnancy_possible is True and days_late > 0:
         guidance.append("Consider a home pregnancy test now, following package instructions. If negative and the period has not started, repeat in a few days or contact a clinician.")
-    if days_late >= 90:
+    if (data.as_of - data.last_period_start).days >= 90:
         guidance.append("Arrange a medical appointment; going around three months without a period needs assessment.")
     elif days_late >= 7:
         guidance.append("If your period remains absent or this pattern repeats, contact a healthcare professional.")
