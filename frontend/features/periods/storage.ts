@@ -1,4 +1,5 @@
-import {cycleMetrics} from "./analytics";\nimport type {PeriodEntry,Flow,Mood} from "./types";
+import {cycleMetrics} from "./analytics";
+import type {PeriodEntry,Flow,Mood} from "./types";
 
 const KEY="minime.period-diary.v1";
 const FLOWS:Flow[]=["none","spotting","light","medium","heavy"];
@@ -43,4 +44,14 @@ export function downloadEntries(entries:PeriodEntry[]):void{
 }
 export function cycleIntervals(entries:PeriodEntry[]):number[]{
   return cycleMetrics(entries).intervals;
+}
+
+export function parseDiaryBackup(text:string):PeriodEntry[]{
+ const payload:unknown=JSON.parse(text);
+ if(!payload||typeof payload!=="object")throw Error("Invalid backup");
+ const b=payload as {format?:unknown;version?:unknown;entries?:unknown};
+ if(b.format!=="minime-period-diary"||![1,2].includes(Number(b.version))||!Array.isArray(b.entries)||b.entries.length>1000||!b.entries.every(validateEntry))throw Error("Unsupported or invalid diary backup");
+ const dates=new Set<string>();
+ for(const e of b.entries as PeriodEntry[]){if(dates.has(e.date))throw Error("Duplicate diary dates");dates.add(e.date)}
+ return [...b.entries].sort((a:PeriodEntry,b:PeriodEntry)=>b.date.localeCompare(a.date));
 }
