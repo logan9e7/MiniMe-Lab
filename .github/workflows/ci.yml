@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: npx --yes tsx --test features/periods/analytics.test.ts
+      - run: npx --yes tsx --test features/periods/analytics.test.ts features/periods/encryptedBackup.test.ts
       - run: npm run build
       - run: test -f out/index.html
       - run: grep -q 'Genetics Playground' out/index.html
