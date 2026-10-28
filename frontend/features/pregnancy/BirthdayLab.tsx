@@ -1,0 +1,4 @@
+"use client";
+import {useState} from "react";
+function offset(s:string,n:number){const d=new Date(s+"T12:00:00Z");d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+export default function BirthdayLab(){const [birthday,setBirthday]=useState("2027-08-15");return (<div className="mt-6 space-y-4"><label className="block font-semibold">Dream birthday<input type="date" value={birthday} onChange={e=>setBirthday(e.target.value)} className="mt-2 block rounded-xl border p-3"/></label>{birthday&&<div className="rounded-2xl bg-pink p-5"><p>Illustrative conception: <b>{offset(birthday,-266)}</b></p><p>Illustrative last period: <b>{offset(birthday,-280)}</b></p><p>Illustrative dates are not predictions of delivery.</p></div>}<p>No conception date guarantees a specific birthday.</p></div>);}
