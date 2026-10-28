@@ -2,17 +2,17 @@
 import {useState} from "react";
 import FertilityLab from "../features/fertility/FertilityLab";
 import TwinsLab from "../features/genetics/TwinsLab";
-import PeriodPlayground from "./PeriodPlayground";
+import PeriodPlayground from "../features/periods/PeriodPlayground";
 import BirthdayLab from "../features/pregnancy/BirthdayLab";
 import SafeSexLab from "../features/safe-sex/SafeSexLab";
-import PregnancyJourney from "./PregnancyJourney";
-import DiscoveryCards from "./DiscoveryCards";
-import ScienceLibrary from "./ScienceLibrary";
-import BiologyExplorer from "./BiologyExplorer";
-import ScienceQuiz from "./ScienceQuiz";
-import ScienceCompanion from "./ScienceCompanion";
-import GeneticsPlayground from "./GeneticsPlayground";
-import FamilyDiscoveryLab from "./FamilyDiscoveryLab";
+import PregnancyJourney from "../features/pregnancy/PregnancyJourney";
+import DiscoveryCards from "../features/education/DiscoveryCards";
+import ScienceLibrary from "../features/education/ScienceLibrary";
+import BiologyExplorer from "../features/education/BiologyExplorer";
+import ScienceQuiz from "../features/education/ScienceQuiz";
+import ScienceCompanion from "../features/education/ScienceCompanion";
+import GeneticsPlayground from "../features/genetics/GeneticsPlayground";
+import FamilyDiscoveryLab from "../features/education/FamilyDiscoveryLab";
 const modules=[["🥚","Fertility Lab","Explore estimated ovulation and timing"],["🎂","Birthday Time Machine","Explore illustrative conception dates"],["👯","Twin Universe","Learn why twins happen"],["🌸","Period Explorer","Understand the menstrual cycle"],["🤰","Pregnancy Journey","Explore pregnancy stages"],["💬","No-Awkward-Questions","Reproductive health without stigma"],["💜","Safe Sex & Rights","Contraception, consent and women’s rights"]];
 export default function Home(){const [active,setActive]=useState(0);
 return <main className="mx-auto max-w-6xl px-4 py-5 sm:px-6 md:py-8"><a className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-white focus:p-3" href="#family-discovery">Skip to interactive labs</a><nav className="flex flex-wrap items-center justify-between gap-3 pb-6"><a href="/" className="flex items-center gap-2 text-xl font-black tracking-tight no-underline sm:text-2xl"><span className="grid h-11 w-11 place-items-center rounded-2xl bg-violet-100 text-2xl">🥚</span>MiniMe <span className="text-violet-700">Lab</span></a><div className="flex flex-wrap items-center gap-3"><a href="#family-discovery" className="text-sm font-bold text-violet-800 hover:underline">Explore games</a><a href="#lab" className="hidden text-sm font-bold text-slate-600 hover:underline sm:inline">Science labs</a><a href="/safe-sex/" className="text-sm font-bold text-violet-800 hover:underline">Safe sex & rights</a><a href="/periods/diary/" className="text-sm font-bold text-violet-800 hover:underline">My diary</a><span className="rounded-full border border-violet-100 bg-white/80 px-3 py-2 text-xs font-semibold text-violet-700">Learn • Play • Discover ✨</span></div></nav>
