@@ -7,6 +7,7 @@ from app.learning import router as learning_router
 from app.science import router as science_router
 from app.discover import router as discover_router
 from app.quiz import router as quiz_router
+from app.period_health import router as period_health_router
 
 app = FastAPI(title="MiniMe Lab", version="0.2.0", docs_url="/docs", redoc_url=None)
 origins = [x.strip() for x in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if x.strip()]
@@ -65,3 +66,5 @@ app.include_router(science_router)
 app.include_router(discover_router)
 
 app.include_router(quiz_router)
+
+app.include_router(period_health_router)
