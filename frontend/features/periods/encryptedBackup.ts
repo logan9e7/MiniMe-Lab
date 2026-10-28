@@ -7,7 +7,7 @@ const fromB64=(s:string)=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 const iterations=310000;
 async function keyFor(password:string,salt:Uint8Array,rounds:number){
  const base=await crypto.subtle.importKey("raw",encoder.encode(password),"PBKDF2",false,["deriveKey"]);
- return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:rounds,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+ return crypto.subtle.deriveKey({name:"PBKDF2",salt:new Uint8Array(salt),iterations:rounds,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
 }
 export async function encryptDiary(entries:PeriodEntry[],password:string):Promise<string>{
  if(password.length<12)throw Error("Use a password of at least 12 characters.");
@@ -15,7 +15,7 @@ export async function encryptDiary(entries:PeriodEntry[],password:string):Promis
  const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
  const key=await keyFor(password,salt,iterations);
  const plaintext=encoder.encode(JSON.stringify({format:"minime-period-diary",version:2,entries}));
- const ciphertext=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,plaintext);
+ const ciphertext=await crypto.subtle.encrypt({name:"AES-GCM",iv:new Uint8Array(iv)},key,plaintext);
  return JSON.stringify({format:"minime-encrypted-diary",version:1,kdf:"PBKDF2-SHA256",iterations,salt:toB64(salt),iv:toB64(iv),ciphertext:toB64(new Uint8Array(ciphertext))},null,2);
 }
 export async function decryptDiary(text:string,password:string):Promise<PeriodEntry[]>{
@@ -25,7 +25,7 @@ export async function decryptDiary(text:string,password:string):Promise<PeriodEn
  const salt=fromB64(b.salt),iv=fromB64(b.iv),cipher=fromB64(b.ciphertext);
  if(salt.length!==16||iv.length!==12||cipher.length>1100000)throw Error("Invalid backup structure");
  const key=await keyFor(password,salt,iterations);
- const plaintext=await crypto.subtle.decrypt({name:"AES-GCM",iv},key,cipher);
+ const plaintext=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(iv)},key,cipher);
  return parseDiaryBackup(decoder.decode(plaintext));
 }
 export function downloadText(text:string,filename:string){
