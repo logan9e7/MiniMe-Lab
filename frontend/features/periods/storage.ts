@@ -44,15 +44,3 @@ export function downloadEntries(entries:PeriodEntry[]):void{
 export function cycleIntervals(entries:PeriodEntry[]):number[]{
   return cycleMetrics(entries).intervals;
 }
-/* Legacy implementation retained below for reference only.
-function oldCycleIntervals(entries:PeriodEntry[]):number[]{
-  const byDate=new Map(entries.map(e=>[e.date,e]));
-  const sorted=[...byDate.keys()].sort();
-  const starts=sorted.filter((d,i)=>byDate.get(d)?.flow!=="none"&&byDate.get(d)?.flow!=="spotting"&&
-    (i===0||!["light","medium","heavy"].includes(byDate.get(sorted[i-1])?.flow||"")||
-    Math.round((Date.parse(d+"T12:00:00Z")-Date.parse(sorted[i-1]+"T12:00:00Z"))/86400000)>1));
-  const lengths:number[]=[];
-  for(let i=1;i<starts.length;i++){const n=Math.round((Date.parse(starts[i]+"T12:00:00Z")-Date.parse(starts[i-1]+"T12:00:00Z"))/86400000);if(n>0)lengths.push(n)}
-  return lengths;
-}
-\n*/\n
