@@ -18,7 +18,7 @@ Legend: [x] code committed; [ ] verification or implementation outstanding. A co
 - [x] Calendar navigation, validated JSON backup restoration.
 - [ ] Test invalid/corrupt/duplicate records, version 1 backups and localStorage failure.
 - [ ] Add explicit backup migration policy and user-facing recovery instructions.
-- [ ] Design encrypted export with authenticated encryption, password KDF and recovery warnings; do not describe current JSON as encrypted.
+- [x] Implement client-side encrypted JSON export and restore (AES-256-GCM/PBKDF2; unverified in browser). Plain JSON export and unencrypted localStorage still exist.\n- [ ] Test encrypted export round-trip, wrong password, tampered file, Safari/Android and password recovery UX.\n- [ ] Decide whether to remove plaintext export and implement app-lock with explicit threat model.
 - [ ] Review sensitive-data analytics, headers and privacy policy.
 
 ## P2 — education and experience
@@ -32,3 +32,8 @@ Legend: [x] code committed; [ ] verification or implementation outstanding. A co
 ## Deployment observations
 Render frontend autoDeploy is enabled but the last confirmed live deploy (when checked) pointed to older commit 11d548c. No newer live deployment was verified.
 CI job exists but successful completion for current main has not been observed.
+
+## 2026-10-28 execution notes
+- Added encryptedBackup.ts and password-based encrypted export/restore to PeriodDiary.tsx. No server upload or account sync.
+- Render frontend service has autoDeploy enabled, but latest inspected live deploy still uses commit 11d548c. No verified live release for recent commits.
+- Full master checklist cannot be closed without actual CI results, compiled WASM, device testing, and independent clinical/legal review.
