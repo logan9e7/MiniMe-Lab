@@ -1,0 +1,11 @@
+"use client";
+import type {PeriodEntry} from "./types";
+export default function DiaryCalendar({entries,month,setMonth,choose}:{entries:PeriodEntry[];month:string;setMonth:(v:string)=>void;choose:(v:string)=>void}){
+ const [year,m]=month.split("-").map(Number);if(!year||!m)return null;
+ const offset=new Date(Date.UTC(year,m-1,1)).getUTCDay();
+ const days=new Date(Date.UTC(year,m,0)).getUTCDate();
+ const byDate=new Map(entries.map(e=>[e.date,e]));
+ const move=(delta:number)=>{const d=new Date(Date.UTC(year,m-1+delta,1));setMonth(d.toISOString().slice(0,7))};
+ const today=new Date();const todayISO=[today.getFullYear(),String(today.getMonth()+1).padStart(2,"0"),String(today.getDate()).padStart(2,"0")].join("-");
+ return <section className="rounded-3xl border border-violet-100 bg-white p-5" aria-label="Diary calendar"><div className="flex items-center justify-between gap-3"><h3 className="text-xl font-black">{new Date(Date.UTC(year,m-1,1)).toLocaleDateString(undefined,{month:"long",year:"numeric",timeZone:"UTC"})}</h3><div className="flex gap-2"><button type="button" onClick={()=>move(-1)} aria-label="Previous month" className="rounded-xl border px-4 py-2">‹</button><button type="button" onClick={()=>move(1)} aria-label="Next month" className="rounded-xl border px-4 py-2">›</button></div></div><div className="mt-4 grid grid-cols-7 gap-1 text-center text-xs">{["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x=><span key={x} className="font-semibold">{x}</span>)}{Array.from({length:offset},(_,i)=><span key={"empty"+i}/>)}{Array.from({length:days},(_,i)=>{const date=month+"-"+String(i+1).padStart(2,"0"),e=byDate.get(date);return <button key={date} type="button" disabled={date>todayISO} onClick={()=>choose(date)} aria-label={date+(e?" recorded "+e.flow:"")} className={"min-h-11 rounded-lg border text-sm disabled:opacity-30 "+(e?.periodStart?"border-rose-400 bg-rose-100 font-bold":e?"border-violet-200 bg-violet-50":"border-transparent hover:bg-amber-50")}>{i+1}{e&&<span className="block text-xs" aria-hidden="true">•</span>}</button>})}</div><p className="mt-3 text-xs text-slate-600">Rose = confirmed period start · Lilac = logged day. Select a date to view or edit.</p></section>
+}
