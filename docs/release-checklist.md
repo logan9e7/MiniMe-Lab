@@ -18,7 +18,8 @@ Legend: [x] code committed; [ ] verification or implementation outstanding. A co
 - [x] Calendar navigation, validated JSON backup restoration.
 - [ ] Test invalid/corrupt/duplicate records, version 1 backups and localStorage failure.
 - [ ] Add explicit backup migration policy and user-facing recovery instructions.
-- [x] Implement client-side encrypted JSON export and restore (AES-256-GCM/PBKDF2; unverified in browser). Plain JSON export and unencrypted localStorage still exist.\n- [ ] Test encrypted export round-trip, wrong password, tampered file, Safari/Android and password recovery UX.\n- [ ] Decide whether to remove plaintext export and implement app-lock with explicit threat model.
+- [x] Implement client-side encrypted JSON export and restore (AES-256-GCM/PBKDF2; unverified in browser). Plain JSON export and unencrypted localStorage still exist.\n- [x] Add automated encrypted export round-trip, wrong-password, tamper and short-password test cases to CI (execution not yet verified).
+- [ ] Verify encrypted backup tests pass in CI, including browser Safari/Android compatibility and password recovery UX.\n- [ ] Decide whether to remove plaintext export and implement app-lock with explicit threat model.
 - [ ] Review sensitive-data analytics, headers and privacy policy.
 
 ## P2 — education and experience
@@ -37,3 +38,8 @@ CI job exists but successful completion for current main has not been observed.
 - Added encryptedBackup.ts and password-based encrypted export/restore to PeriodDiary.tsx. No server upload or account sync.
 - Render frontend service has autoDeploy enabled, but latest inspected live deploy still uses commit 11d548c. No verified live release for recent commits.
 - Full master checklist cannot be closed without actual CI results, compiled WASM, device testing, and independent clinical/legal review.
+
+## 2026-10-28 latest execution
+- Added encryptedBackup.test.ts, wired into frontend GitHub Actions.
+- Fixed WebCrypto salt/IV BufferSource typing for strict TS.
+- Current CI run completion is unverified; browser-device QA, clinical/legal sign-off and WASM build are still pending.
