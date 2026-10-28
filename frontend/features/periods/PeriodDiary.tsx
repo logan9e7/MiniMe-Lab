@@ -1,8 +1,9 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
 import type {Flow,Mood,PeriodEntry} from "./types";
-import {readEntries,saveEntries,clearEntries,downloadEntries,cycleIntervals} from "./storage";
+import {readEntries,saveEntries,clearEntries,downloadEntries,cycleIntervals,parseDiaryBackup} from "./storage";
 import DiaryInsights from "./DiaryInsights";
+import DiaryCalendar from "./DiaryCalendar";
 
 const FLOWS:Flow[]=["none","spotting","light","medium","heavy"];
 const MOODS:Mood[]=["not_recorded","good","neutral","low","anxious"];
@@ -12,16 +13,17 @@ const field="mt-2 w-full rounded-xl border border-violet-200 bg-white p-3";
 export default function PeriodDiary(){
  const [loaded,setLoaded]=useState(false),[entries,setEntries]=useState<PeriodEntry[]>([]);
  const [date,setDate]=useState(""),[flow,setFlow]=useState<Flow>("medium"),[pain,setPain]=useState(0),[mood,setMood]=useState<Mood>("not_recorded"),[symptoms,setSymptoms]=useState<string[]>([]),[notes,setNotes]=useState("");
- const [message,setMessage]=useState("");const [periodStart,setPeriodStart]=useState(false);
- useEffect(()=>{setEntries(readEntries());setDate(dateToday());setLoaded(true)},[]);
+ const [message,setMessage]=useState("");const [month,setMonth]=useState("");const [periodStart,setPeriodStart]=useState(false);
+ useEffect(()=>{setEntries(readEntries());setDate(dateToday());setMonth(dateToday().slice(0,7));setLoaded(true)},[]);
  const intervals=useMemo(()=>cycleIntervals(entries),[entries]);
  const avg=intervals.length?Math.round(intervals.reduce((a,b)=>a+b,0)/intervals.length*10)/10:null;
- function choose(d:string){const e=entries.find(x=>x.date===d);setDate(d);setFlow(e?.flow||"medium");setPeriodStart(e?.periodStart===true);setPain(e?.pain||0);setMood(e?.mood||"not_recorded");setSymptoms(e?.symptoms||[]);setNotes(e?.notes||"");setMessage("")}
+ function choose(d:string){const e=entries.find(x=>x.date===d);setDate(d);setMonth(d.slice(0,7));setFlow(e?.flow||"medium");setPeriodStart(e?.periodStart===true);setPain(e?.pain||0);setMood(e?.mood||"not_recorded");setSymptoms(e?.symptoms||[]);setNotes(e?.notes||"");setMessage("")}
  function persist(next:PeriodEntry[],success:string){try{saveEntries(next);setEntries(next);setMessage(success)}catch{setMessage("Could not save on this device. Check browser storage settings.")}}
  function save(){if(!date||date>dateToday()){setMessage("Choose a valid date, not in the future.");return}
    const e:PeriodEntry={date,flow,periodStart:periodStart&&["light","medium","heavy"].includes(flow),pain,mood,symptoms,notes:notes.slice(0,500),updatedAt:new Date().toISOString()};
    persist([e,...entries.filter(x=>x.date!==date)].sort((a,b)=>b.date.localeCompare(a.date)),"Entry saved on this device.")}
  function remove(){if(!entries.some(e=>e.date===date))return;if(!window.confirm("Delete this day's record?"))return;persist(entries.filter(e=>e.date!==date),"Entry deleted.")}
+ async function restore(file:File|undefined){if(!file)return;if(file.size>1024*1024){setMessage("Backup exceeds 1 MB.");return}try{const incoming=parseDiaryBackup(await file.text());if(!window.confirm("Replace all current diary entries with "+incoming.length+" imported records? Export your current diary first."))return;persist(incoming,"Backup restored on this device.")}catch{setMessage("Backup rejected. Check format, dates and values.")}}
  function erase(){if(!window.confirm("Permanently delete every period diary entry stored in this browser?"))return;try{clearEntries();setEntries([]);setMessage("All diary entries deleted from this browser.")}catch{setMessage("Unable to delete local data.")}}
  if(!loaded)return <p className="p-6">Opening private diary…</p>;
  return <section className="space-y-6" aria-label="Private period diary">
@@ -36,8 +38,10 @@ export default function PeriodDiary(){
   <label className="mt-5 block text-sm font-semibold">Private notes (optional)<textarea maxLength={500} rows={3} value={notes} onChange={e=>setNotes(e.target.value)} className={field} placeholder="Anything you want to remember…"/></label>
   <div className="mt-4 flex flex-wrap gap-3"><button type="button" onClick={save} className="rounded-xl bg-violet-700 px-5 py-3 font-bold text-white">Save day</button>{entries.some(e=>e.date===date)&&<button type="button" onClick={remove} className="rounded-xl border px-5 py-3 font-bold">Delete this day</button>}</div>{message&&<p role="status" className="mt-3 text-sm">{message}</p>}</div>
   <DiaryInsights entries={entries}/>
+  <DiaryCalendar entries={entries} month={month} setMonth={setMonth} choose={choose}/>
   <div className="rounded-3xl border border-violet-100 bg-white p-5"><h3 className="text-xl font-black">Your recorded days</h3>{entries.length===0?<p className="mt-3 text-sm text-slate-600">No entries yet. Save your first day to begin.</p>:<div className="mt-4 space-y-2">{entries.slice(0,50).map(e=><button key={e.date} type="button" onClick={()=>choose(e.date)} className="flex w-full items-center justify-between rounded-xl bg-violet-50 p-3 text-left text-sm hover:bg-violet-100"><span className="font-bold">{e.date}</span><span>{e.flow} · pain {e.pain}/10</span></button>)}</div>}{entries.length>50&&<p className="mt-3 text-xs">Showing the most recent 50 days. Export includes all saved records.</p>}</div>
-  <div className="rounded-3xl border border-violet-100 bg-white p-5"><h3 className="text-lg font-black">Your data controls</h3><p className="mt-2 text-sm text-slate-600">Export before switching devices or clearing your browser. Export files contain sensitive information; store them securely.</p><div className="mt-4 flex flex-wrap gap-3"><button type="button" disabled={!entries.length} onClick={()=>downloadEntries(entries)} className="rounded-xl border border-violet-300 px-4 py-3 font-semibold disabled:opacity-50">Export JSON</button><button type="button" disabled={!entries.length} onClick={erase} className="rounded-xl border border-rose-300 px-4 py-3 font-semibold text-rose-800 disabled:opacity-50">Delete all records</button></div></div>
+  <div className="rounded-3xl border border-violet-100 bg-white p-5"><h3 className="text-lg font-black">Your data controls</h3><p className="mt-2 text-sm text-slate-600">Export before switching devices or clearing your browser. Export files contain sensitive information; store them securely.</p><div className="mt-4 flex flex-wrap gap-3"><button type="button" disabled={!entries.length} onClick={()=>downloadEntries(entries)} className="rounded-xl border border-violet-300 px-4 py-3 font-semibold disabled:opacity-50">Export JSON</button><label className="cursor-pointer rounded-xl border border-violet-300 px-4 py-3 font-semibold">Restore JSON<input type="file" accept=".json,application/json" className="sr-only" onChange={e=>{void restore(e.target.files?.[0]);e.target.value=""}}/></label><button type="button" disabled={!entries.length} onClick={erase} className="rounded-xl border border-rose-300 px-4 py-3 font-semibold text-rose-800 disabled:opacity-50">Delete all records</button></div></div>
   <p className="text-xs text-slate-600">Cycle intervals use only user-confirmed period starts, not medical assessments or fertility predictions. Incomplete logging can distort results.</p>
  </section>
 }
+\n
