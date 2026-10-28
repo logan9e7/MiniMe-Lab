@@ -2,6 +2,7 @@
 import {useEffect,useMemo,useState} from "react";
 import type {Flow,Mood,PeriodEntry} from "./types";
 import {readEntries,saveEntries,clearEntries,downloadEntries,cycleIntervals} from "./storage";
+import DiaryInsights from "./DiaryInsights";
 
 const FLOWS:Flow[]=["none","spotting","light","medium","heavy"];
 const MOODS:Mood[]=["not_recorded","good","neutral","low","anxious"];
@@ -11,14 +12,14 @@ const field="mt-2 w-full rounded-xl border border-violet-200 bg-white p-3";
 export default function PeriodDiary(){
  const [loaded,setLoaded]=useState(false),[entries,setEntries]=useState<PeriodEntry[]>([]);
  const [date,setDate]=useState(""),[flow,setFlow]=useState<Flow>("medium"),[pain,setPain]=useState(0),[mood,setMood]=useState<Mood>("not_recorded"),[symptoms,setSymptoms]=useState<string[]>([]),[notes,setNotes]=useState("");
- const [message,setMessage]=useState("");
+ const [message,setMessage]=useState("");const [periodStart,setPeriodStart]=useState(false);
  useEffect(()=>{setEntries(readEntries());setDate(dateToday());setLoaded(true)},[]);
  const intervals=useMemo(()=>cycleIntervals(entries),[entries]);
  const avg=intervals.length?Math.round(intervals.reduce((a,b)=>a+b,0)/intervals.length*10)/10:null;
- function choose(d:string){const e=entries.find(x=>x.date===d);setDate(d);setFlow(e?.flow||"medium");setPain(e?.pain||0);setMood(e?.mood||"not_recorded");setSymptoms(e?.symptoms||[]);setNotes(e?.notes||"");setMessage("")}
+ function choose(d:string){const e=entries.find(x=>x.date===d);setDate(d);setFlow(e?.flow||"medium");setPeriodStart(e?.periodStart===true);setPain(e?.pain||0);setMood(e?.mood||"not_recorded");setSymptoms(e?.symptoms||[]);setNotes(e?.notes||"");setMessage("")}
  function persist(next:PeriodEntry[],success:string){try{saveEntries(next);setEntries(next);setMessage(success)}catch{setMessage("Could not save on this device. Check browser storage settings.")}}
  function save(){if(!date||date>dateToday()){setMessage("Choose a valid date, not in the future.");return}
-   const e:PeriodEntry={date,flow,pain,mood,symptoms,notes:notes.slice(0,500),updatedAt:new Date().toISOString()};
+   const e:PeriodEntry={date,flow,periodStart:periodStart&&["light","medium","heavy"].includes(flow),pain,mood,symptoms,notes:notes.slice(0,500),updatedAt:new Date().toISOString()};
    persist([e,...entries.filter(x=>x.date!==date)].sort((a,b)=>b.date.localeCompare(a.date)),"Entry saved on this device.")}
  function remove(){if(!entries.some(e=>e.date===date))return;if(!window.confirm("Delete this day's record?"))return;persist(entries.filter(e=>e.date!==date),"Entry deleted.")}
  function erase(){if(!window.confirm("Permanently delete every period diary entry stored in this browser?"))return;try{clearEntries();setEntries([]);setMessage("All diary entries deleted from this browser.")}catch{setMessage("Unable to delete local data.")}}
@@ -31,11 +32,12 @@ export default function PeriodDiary(){
    <label className="text-sm font-semibold">Bleeding<select className={field} value={flow} onChange={e=>setFlow(e.target.value as Flow)}>{FLOWS.map(v=><option key={v} value={v}>{v}</option>)}</select></label>
    <label className="text-sm font-semibold">Pain intensity: {pain}/10<input type="range" min="0" max="10" value={pain} onChange={e=>setPain(+e.target.value)} className="mt-4 w-full"/></label>
    <label className="text-sm font-semibold">Mood<select className={field} value={mood} onChange={e=>setMood(e.target.value as Mood)}>{MOODS.map(v=><option key={v} value={v}>{v.replace("_"," ")}</option>)}</select></label>
-  </div><fieldset className="mt-5"><legend className="font-bold">Symptoms (optional)</legend><div className="mt-3 flex flex-wrap gap-3">{SYMPTOMS.map(s=><label key={s} className="flex items-center gap-2 rounded-full bg-violet-50 px-3 py-2 text-sm"><input type="checkbox" checked={symptoms.includes(s)} onChange={e=>setSymptoms(p=>e.target.checked?[...p,s]:p.filter(x=>x!==s))}/>{s}</label>)}</div></fieldset>
+  </div><label className="mt-4 flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-sm"><input type="checkbox" className="mt-1" checked={periodStart} disabled={flow==="none"||flow==="spotting"} onChange={e=>setPeriodStart(e.target.checked)}/><span><strong>This is the first day of a new period</strong><br/>Confirm only when you know this is a new period. Older entries are not automatically treated as starts.</span></label><fieldset className="mt-5"><legend className="font-bold">Symptoms (optional)</legend><div className="mt-3 flex flex-wrap gap-3">{SYMPTOMS.map(s=><label key={s} className="flex items-center gap-2 rounded-full bg-violet-50 px-3 py-2 text-sm"><input type="checkbox" checked={symptoms.includes(s)} onChange={e=>setSymptoms(p=>e.target.checked?[...p,s]:p.filter(x=>x!==s))}/>{s}</label>)}</div></fieldset>
   <label className="mt-5 block text-sm font-semibold">Private notes (optional)<textarea maxLength={500} rows={3} value={notes} onChange={e=>setNotes(e.target.value)} className={field} placeholder="Anything you want to remember…"/></label>
   <div className="mt-4 flex flex-wrap gap-3"><button type="button" onClick={save} className="rounded-xl bg-violet-700 px-5 py-3 font-bold text-white">Save day</button>{entries.some(e=>e.date===date)&&<button type="button" onClick={remove} className="rounded-xl border px-5 py-3 font-bold">Delete this day</button>}</div>{message&&<p role="status" className="mt-3 text-sm">{message}</p>}</div>
+  <DiaryInsights entries={entries}/>
   <div className="rounded-3xl border border-violet-100 bg-white p-5"><h3 className="text-xl font-black">Your recorded days</h3>{entries.length===0?<p className="mt-3 text-sm text-slate-600">No entries yet. Save your first day to begin.</p>:<div className="mt-4 space-y-2">{entries.slice(0,50).map(e=><button key={e.date} type="button" onClick={()=>choose(e.date)} className="flex w-full items-center justify-between rounded-xl bg-violet-50 p-3 text-left text-sm hover:bg-violet-100"><span className="font-bold">{e.date}</span><span>{e.flow} · pain {e.pain}/10</span></button>)}</div>}{entries.length>50&&<p className="mt-3 text-xs">Showing the most recent 50 days. Export includes all saved records.</p>}</div>
   <div className="rounded-3xl border border-violet-100 bg-white p-5"><h3 className="text-lg font-black">Your data controls</h3><p className="mt-2 text-sm text-slate-600">Export before switching devices or clearing your browser. Export files contain sensitive information; store them securely.</p><div className="mt-4 flex flex-wrap gap-3"><button type="button" disabled={!entries.length} onClick={()=>downloadEntries(entries)} className="rounded-xl border border-violet-300 px-4 py-3 font-semibold disabled:opacity-50">Export JSON</button><button type="button" disabled={!entries.length} onClick={erase} className="rounded-xl border border-rose-300 px-4 py-3 font-semibold text-rose-800 disabled:opacity-50">Delete all records</button></div></div>
-  <p className="text-xs text-slate-600">Cycle intervals are descriptive statistics from logged days, not medical assessments or fertility predictions. Incomplete logging can distort results.</p>
+  <p className="text-xs text-slate-600">Cycle intervals use only user-confirmed period starts, not medical assessments or fertility predictions. Incomplete logging can distort results.</p>
  </section>
 }
