@@ -1,4 +1,4 @@
-import type {PeriodEntry,Flow,Mood} from "./types";
+import {cycleMetrics} from "./analytics";\nimport type {PeriodEntry,Flow,Mood} from "./types";
 
 const KEY="minime.period-diary.v1";
 const FLOWS:Flow[]=["none","spotting","light","medium","heavy"];
@@ -18,6 +18,8 @@ export function validateEntry(v:unknown):v is PeriodEntry{
     typeof e.pain==="number"&&Number.isInteger(e.pain)&&e.pain>=0&&e.pain<=10&&
     MOODS.includes(e.mood as Mood)&&Array.isArray(e.symptoms)&&e.symptoms.length<=SYMPTOMS.length&&
     e.symptoms.every(s=>typeof s==="string"&&SYMPTOMS.includes(s))&&
+    (e.periodStart===undefined||typeof e.periodStart==="boolean")&&
+    (e.periodStart!==true||["light","medium","heavy"].includes(e.flow as Flow))&&
     typeof e.notes==="string"&&e.notes.length<=500&&typeof e.updatedAt==="string";
 }
 export function readEntries():PeriodEntry[]{
@@ -34,12 +36,16 @@ export function saveEntries(entries:PeriodEntry[]):void{
 }
 export function clearEntries():void{window.localStorage.removeItem(KEY)}
 export function downloadEntries(entries:PeriodEntry[]):void{
-  const blob=new Blob([JSON.stringify({format:"minime-period-diary",version:1,exportedAt:new Date().toISOString(),entries},null,2)],{type:"application/json"});
+  const blob=new Blob([JSON.stringify({format:"minime-period-diary",version:2,exportedAt:new Date().toISOString(),entries},null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download="minime-period-diary.json";document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 export function cycleIntervals(entries:PeriodEntry[]):number[]{
+  return cycleMetrics(entries).intervals;
+}
+/* Legacy implementation retained below for reference only.
+function oldCycleIntervals(entries:PeriodEntry[]):number[]{
   const byDate=new Map(entries.map(e=>[e.date,e]));
   const sorted=[...byDate.keys()].sort();
   const starts=sorted.filter((d,i)=>byDate.get(d)?.flow!=="none"&&byDate.get(d)?.flow!=="spotting"&&
@@ -49,3 +55,4 @@ export function cycleIntervals(entries:PeriodEntry[]):number[]{
   for(let i=1;i<starts.length;i++){const n=Math.round((Date.parse(starts[i]+"T12:00:00Z")-Date.parse(starts[i-1]+"T12:00:00Z"))/86400000);if(n>0)lengths.push(n)}
   return lengths;
 }
+\n*/\n
