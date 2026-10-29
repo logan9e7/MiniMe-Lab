@@ -1,6 +1,11 @@
 name: Build and publish MiniMe Android APK
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/android-apk.yml'
 permissions:
   contents: write
 jobs:
