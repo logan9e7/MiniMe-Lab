@@ -1,0 +1,38 @@
+name: Build MiniMe Android APK
+on:
+  workflow_dispatch:
+jobs:
+  android-preview:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Verify build credentials
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$EXPO_TOKEN" || (echo "Missing EXPO_TOKEN GitHub secret" && exit 1)
+          test -n "$EXPO_PUBLIC_SUPABASE_URL" || (echo "Missing Supabase URL repository variable" && exit 1)
+          test -n "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || (echo "Missing Supabase publishable key repository variable" && exit 1)
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Start remote Android APK build
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_API_URL: https://minime-lab-api.onrender.com
+        run: eas build --platform android --profile preview --non-interactive --wait
