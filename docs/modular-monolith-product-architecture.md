@@ -35,3 +35,9 @@ Design QA incomplete: Starter tool-call limit prevented full frame sizing/visual
 - Appointment preparation with user-consented export.
 - Clinical/editorial and Indian legal review, screen reader/mobile QA.
 - Verify deployment of new commits; do not claim production live before evidence.
+
+## Non-negotiable preservation rule — Playful Science Arcade
+Do not delete, hide behind authentication, or regress the original experiments when adding personal tracking. Retain Fertility Lab, Birthday Time Machine, Twin Universe, Period Explorer, Pregnancy Journey, No-Awkward-Questions, Safe Sex & Rights, Family Discovery Lab, Biology Explorer, Genetics Playground, Hormone Explorer, Science Quiz, Science Library and Nova/Pip/Helix science guides. Preserve original educational safety disclaimers. The homepage links to #lab and the primary Today/Learn subtabs expose the arcade.
+
+## Design principle
+Friendly, curious, colorful, approachable, women-first and inclusive; tracking is opt-in. The app should be delightful without gamifying serious health risks or inventing medical certainty.
