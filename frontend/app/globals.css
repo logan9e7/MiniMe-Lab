@@ -32,6 +32,3 @@ a{text-underline-offset:3px}
 .section-kicker{font-size:.75rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7655bd}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 @media(max-width:640px){.hero-shell{border-radius:26px}.panel{border-radius:22px}.hero-title{letter-spacing:-.04em}}
-@import '../styles/learning.css';
-@import '../styles/shell.css';
-@import '../styles/navigation.css';
