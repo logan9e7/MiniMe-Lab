@@ -1,10 +1,10 @@
 "use client";
 import {useState} from "react";
 const primary=[
-{href:"/",label:"Today",icon:"⌂",sub:[["Overview","/"],["Learning","/#learning"],["Explore labs","/#lab"]]},
+{href:"/",label:"Today",icon:"⌂",sub:[["Overview","/"],["Science guides","/#learning"],["Play arcade","/#lab"]]},
 {href:"/periods/diary/",label:"Cycle",icon:"◷",sub:[["Calendar","/periods/diary/#calendar"],["Symptoms","/periods/diary/#record"],["Patterns","/periods/diary/#insights"]]},
 {href:"/pregnancy/",label:"Pregnancy",icon:"♡",sub:[["Timeline","/pregnancy/#timeline"],["Check-ins","/pregnancy/#checkins"],["Appointments","/pregnancy/#appointments"]]},
-{href:"/safe-sex/",label:"Learn",icon:"✿",sub:[["Sex ed","/safe-sex/"],["Protection","/safe-sex/#contraception"],["Consent","/safe-sex/#consent-lab"]]},
+{href:"/safe-sex/",label:"Learn",icon:"✿",sub:[["Sex ed","/safe-sex/"],["Protection","/safe-sex/#contraception"],["Fun labs","/#lab"]]},
 {href:"/companion/",label:"Companion",icon:"✧",sub:[["Ask","/companion/#ask"],["Prepare","/companion/#prepare"],["Privacy","/companion/#privacy"]]}
 ];
 export default function AppNavigation(){
