@@ -5,6 +5,7 @@ const primary=[
 {href:"/periods/diary/",label:"Cycle",icon:"◷",sub:[["Calendar","/periods/diary/#calendar"],["Symptoms","/periods/diary/#record"],["Patterns","/periods/diary/#insights"]]},
 {href:"/pregnancy/",label:"Pregnancy",icon:"♡",sub:[["Timeline","/pregnancy/#timeline"],["Check-ins","/pregnancy/#checkins"],["Appointments","/pregnancy/#appointments"]]},
 {href:"/safe-sex/",label:"Learn",icon:"✿",sub:[["Sex ed","/safe-sex/"],["Protection","/safe-sex/#contraception"],["Fun labs","/#lab"]]},
+{href:"/health-library/",label:"Health",icon:"✚",sub:[["Conditions","/health-library/"],["Cancer awareness","/health-library/"],["Pelvic health","/health-library/"]]},
 {href:"/companion/",label:"Companion",icon:"✧",sub:[["Ask","/companion/#ask"],["Prepare","/companion/#prepare"],["Privacy","/companion/#privacy"]]}
 ];
 export default function AppNavigation(){
