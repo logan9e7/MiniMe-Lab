@@ -37,10 +37,16 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Generate reproducible npm lockfile for EAS
+        run: |
+          npm install --package-lock-only --no-audit --no-fund
+          npm ci --include=dev --no-audit --no-fund
       - name: Typecheck
         run: npm run typecheck
       - name: Build Android preview APK with EAS
-        run: eas build --platform android --profile preview --non-interactive --wait --json > "$RUNNER_TEMP/eas-build.json"
+        run: |
+          export EAS_NO_VCS=1
+          eas build --platform android --profile preview --non-interactive --wait --json > "$RUNNER_TEMP/eas-build.json"
       - name: Print Expo build diagnostics on failure
         if: failure()
         run: |
