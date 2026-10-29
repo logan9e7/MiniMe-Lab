@@ -1,14 +1,10 @@
 "use client";
 import {useEffect,useState} from "react";
 import PregnancyJourney from "./PregnancyJourney";
-const KEY="minime.pregnancy.v1";
-type CheckIn={date:string;symptoms:string;notes:string};
-type RecordData={dueDate:string;checkins:CheckIn[]};
-const today=()=>new Date().toLocaleDateString("en-CA");
-const valid=(s:string)=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(Date.parse(s+"T12:00:00Z"));
+import {KEY,parseRecords,validDate as valid,localDate as today,type RecordData} from "./storage";
 export default function PregnancyTracker(){
  const [data,setData]=useState<RecordData>({dueDate:"",checkins:[]}),[ready,setReady]=useState(false),[symptoms,setSymptoms]=useState(""),[notes,setNotes]=useState(""),[message,setMessage]=useState("");
- useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw) as RecordData;if(d&&Array.isArray(d.checkins)&&typeof d.dueDate==="string")setData({dueDate:d.dueDate,checkins:d.checkins.filter(x=>valid(x.date)&&typeof x.notes==="string"&&typeof x.symptoms==="string").slice(0,300)})}}catch{}setReady(true)},[]);
+ useEffect(()=>{try{const raw=localStorage.getItem(KEY);if(raw){setData(parseRecords(raw))}}catch{}setReady(true)},[]);
  function save(next:RecordData){try{localStorage.setItem(KEY,JSON.stringify(next));setData(next);setMessage("Saved on this browser.")}catch{setMessage("Unable to save. Check browser storage settings.")}}
  const days=data.dueDate&&valid(data.dueDate)?Math.round((Date.parse(data.dueDate+"T12:00:00Z")-Date.parse(today()+"T12:00:00Z"))/86400000):null;
  const week=days===null?null:Math.max(1,Math.min(42,Math.floor((280-days)/7)));

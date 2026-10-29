@@ -16,6 +16,8 @@ class ForecastInput(BaseModel):
     def check(self):
         if self.bleeding_days > self.cycle_length:
             raise ValueError("Bleeding duration cannot exceed cycle length.")
+        if (date.max - self.last_period_start).days < self.cycles_ahead * self.cycle_length + self.bleeding_days - 1:
+            raise ValueError("Forecast exceeds supported calendar dates.")
         return self
 
 class DelayInput(BaseModel):
@@ -33,6 +35,8 @@ class DelayInput(BaseModel):
     def check(self):
         if self.as_of < self.last_period_start:
             raise ValueError("Assessment date cannot precede last period.")
+        if (date.max - self.last_period_start).days < self.usual_cycle_length:
+            raise ValueError("Expected period exceeds supported calendar dates.")
         return self
 
 @router.post("/forecast")
