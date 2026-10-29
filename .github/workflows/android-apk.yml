@@ -1,38 +1,71 @@
-name: Build MiniMe Android APK
+name: Build and publish MiniMe Android APK
 on:
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   android-preview:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: mobile
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_PUBLIC_SUPABASE_URL: https://ipseslbjrzzqutaatdiz.supabase.co
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_3ueSbzBPMC_5tT5-8dhOBA_uOa2NJHi
+      EXPO_PUBLIC_API_URL: https://minime-lab-api.onrender.com
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Verify Expo token
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::Add EXPO_TOKEN as a GitHub Actions repository secret before running this workflow."
+            exit 1
+          fi
       - uses: expo/expo-github-action@v8
         with:
-          expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-      - name: Verify build credentials
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
-          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-        run: |
-          test -n "$EXPO_TOKEN" || (echo "Missing EXPO_TOKEN GitHub secret" && exit 1)
-          test -n "$EXPO_PUBLIC_SUPABASE_URL" || (echo "Missing Supabase URL repository variable" && exit 1)
-          test -n "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || (echo "Missing Supabase publishable key repository variable" && exit 1)
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: Typecheck
         run: npm run typecheck
-      - name: Start remote Android APK build
-        env:
-          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
-          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          EXPO_PUBLIC_API_URL: https://minime-lab-api.onrender.com
-        run: eas build --platform android --profile preview --non-interactive --wait
+      - name: Build Android preview APK with EAS
+        run: eas build --platform android --profile preview --non-interactive --wait --json > "$RUNNER_TEMP/eas-build.json"
+      - name: Download APK from completed EAS build
+        shell: bash
+        run: |
+          node - "$RUNNER_TEMP/eas-build.json" "$RUNNER_TEMP/apk-url.txt" <<'NODE'
+          const fs=require("fs");
+          const [src,dest]=process.argv.slice(2);
+          const raw=fs.readFileSync(src,"utf8");
+          const match=raw.match(/\[\s*\{/);
+          if(!match)throw Error("EAS build output was not JSON: check build logs.");
+          const result=JSON.parse(raw.slice(match.index));
+          const build=Array.isArray(result)?result[0]:result;
+          if(build.status!=="FINISHED"||!build.artifacts?.buildUrl)throw Error("No completed Android APK artifact returned by EAS");
+          fs.writeFileSync(dest,build.artifacts.buildUrl);
+          NODE
+          url="$(cat "$RUNNER_TEMP/apk-url.txt")"
+          case "$url" in https://*) ;; *) echo "Invalid APK URL"; exit 1;; esac
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/MiniMe-Lab-Android.apk" "$url"
+          test -s "$RUNNER_TEMP/MiniMe-Lab-Android.apk"
+          file "$RUNNER_TEMP/MiniMe-Lab-Android.apk"
+      - name: Upload APK as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiniMe-Lab-Android-APK
+          path: ${{ runner.temp }}/MiniMe-Lab-Android.apk
+          retention-days: 30
+      - name: Attach APK to GitHub prerelease
+        shell: bash
+        run: |
+          tag="android-preview-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" "$RUNNER_TEMP/MiniMe-Lab-Android.apk#MiniMe Lab Android APK" \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
+            --title "MiniMe Lab Android preview #${GITHUB_RUN_NUMBER}" \
+            --notes "Preview APK from Expo EAS. For testing only; not a production medical app."
