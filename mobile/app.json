@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "MiniMe Lab",
+    "slug": "minime-lab",
+    "scheme": "minimelab",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "android": {
+      "package": "com.minimelab.companion"
+    },
+    "ios": {
+      "bundleIdentifier": "com.minimelab.companion",
+      "supportsTablet": true
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
