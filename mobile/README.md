@@ -29,3 +29,15 @@ Today, Cycle (log/history), Pregnancy (timeline/check-ins), Learn (sex education
 - Original biology arcade currently opens the existing website from Learn; its full native port is pending.
 - Add account deletion, encrypted local offline storage, notification consent, export, accessibility testing, clinical review and app-store compliance before public release.
 - No APK/IPA was built or published by these GitHub commits.
+
+## Android APK release pipeline (added 2026-10-29)
+- GitHub Actions: `.github/workflows/android-apk.yml` supports manual EAS preview APK builds.
+- Set `EXPO_TOKEN` as a GitHub Actions **secret** for your Expo account.
+- Set `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as GitHub Actions **variables** (values available in `mobile/.env.example`). These are public client values, not service-role secrets.
+- Initialize EAS project linking in the Expo account with `cd mobile && npx eas-cli init`; commit the generated Expo project ID in `mobile/app.json`. Remote noninteractive builds need that linkage.
+- Run GitHub Actions → **Build MiniMe Android APK** → Run workflow. An EAS build link appears in the workflow logs. The pipeline is committed but has **not** been executed successfully.
+- `mobile/lib/supabase.ts` stores sessions in OS SecureStore. Confirm the installed Expo version supports the selected SecureStore keychain option and test refresh/large sessions on physical Android/iOS devices.
+- `mobile/app/(tabs)/companion.tsx` adds persistent session UI and explicit deletion of tracking rows. Full auth account deletion and recovery flows are still missing.
+- Native dates are now recorded in device local time.
+- A lockfile has not yet been generated or verified. Generate and commit `mobile/package-lock.json` from a successful install, then replace npm install with npm ci in CI and build workflows.
+- Verify email confirmation/deep links in the Supabase dashboard. The app currently does not handle password-reset or verification links in-app.
