@@ -1,11 +1,11 @@
 from datetime import date, timedelta
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 router = APIRouter(tags=["Pregnancy education"])
 
 class BirthdayInput(BaseModel):
-    target_birthday: date
+    target_birthday: date = Field(ge=date.min + timedelta(days=280))
 
 @router.post("/api/birthday")
 def birthday(data: BirthdayInput):

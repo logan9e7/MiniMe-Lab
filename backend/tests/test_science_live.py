@@ -23,3 +23,9 @@ def test_genetics_search_rejects_short_queries():
 def test_genetics_search_handles_provider_failure():
     with patch("app.science.fetch_xml", side_effect=TimeoutError()):
         assert client.get("/api/science/genetics/search?term=CFTR").status_code == 503
+
+
+def test_science_title_collapses_whitespace():
+    sample = ElementTree.fromstring('''<result><document url="https://medlineplus.gov/genetics/gene/cftr/"><content name="title">CFTR\n   inheritance</content></document></result>''')
+    with patch("app.science.fetch_xml", return_value=sample):
+        assert client.get('/api/science/search').json()['articles'][0]['title'] == 'CFTR inheritance'

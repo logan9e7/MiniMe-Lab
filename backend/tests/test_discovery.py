@@ -26,3 +26,31 @@ def test_unsupported_question():
     response = client.get("/api/discover/ask?question=How do airplanes fly")
     assert response.status_code == 200
     assert response.json()["status"] == "unsupported"
+
+
+def test_discovery_reports_both_provider_failures():
+    from unittest.mock import patch
+    with patch('app.discover.medline', side_effect=TimeoutError), patch('app.discover.publications', side_effect=ValueError):
+        data = client.get('/api/discover/home').json()
+    assert data['retrieval_status'] == 'partial'
+    assert data['unavailable_sources'] == ['medlineplus', 'europepmc']
+    assert data['articles'] == data['papers'] == []
+
+
+def test_discovery_empty_results_are_not_generated_answers():
+    from unittest.mock import patch
+    with patch('app.discover.medline', return_value=[]):
+        data = client.get('/api/discover/ask?question=What is ovulation').json()
+    assert data['status'] == 'unavailable'
+    assert data['answer'] is None
+
+
+def test_discovery_ranks_retrieved_excerpts():
+    from unittest.mock import patch
+    items = [{'title':'General', 'summary':'Biology', 'url':'https://medlineplus.gov/biology.html'},
+             {'title':'Ovulation', 'summary':'Ovulation overview', 'url':'https://medlineplus.gov/ovulation.html'}]
+    with patch('app.discover.medline', return_value=items):
+        data = client.get('/api/discover/ask?question=What is ovulation').json()
+    assert data['status'] == 'retrieved'
+    assert data['answer'] is None
+    assert data['sources'][0]['title'] == 'Ovulation'

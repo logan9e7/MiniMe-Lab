@@ -45,7 +45,7 @@ def search(topic: str = Query("genetics", min_length=2, max_length=40)):
         records = []
         for doc in root.findall(".//document"):
             title_node = doc.find("./content[@name='title']")
-            title = re.sub(r"\\s+", " ", unescape("".join(title_node.itertext()) if title_node is not None else "")).strip()
+            title = re.sub(r"\s+", " ", unescape("".join(title_node.itertext()) if title_node is not None else "")).strip()
             url = doc.get("url", "")
             if url.startswith("https://medlineplus.gov/"):
                 records.append({"title": title or term.title(), "url": url, "source": "MedlinePlus / US National Library of Medicine"})
@@ -69,7 +69,7 @@ def genetics_search(term: str = Query("chromosomes", min_length=2, max_length=60
             if not url.startswith("https://medlineplus.gov/genetics/"):
                 continue
             node = doc.find("./content[@name='title']")
-            title = re.sub(r"\\s+", " ", unescape("".join(node.itertext()) if node is not None else "")).strip()
+            title = re.sub(r"\s+", " ", unescape("".join(node.itertext()) if node is not None else "")).strip()
             records.append({"title": title or term, "url": url, "source": "MedlinePlus Genetics"})
         return {"term": term, "results": records, "source": "MedlinePlus Genetics", "notice": "Reference material, not a genetic test or personalized prediction."}
     except Exception:
