@@ -81,3 +81,12 @@ body{background:radial-gradient(ellipse 850px 460px at 100% 0%,#ffe2d5aa,transpa
 .action-peach{background:#ffe2d5}.action-mint{background:#d9f2e6}.action-butter{background:#ffe6a5}.action-lilac{background:#e5d8ff}
 @media(max-width:900px){.brand-caption{display:none}.app-desktop-nav{gap:11px}}
 @media(max-width:640px){body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}.app-topbar{padding-bottom:8px}.app-desktop-nav{display:none}.app-desktop-nav.is-open{display:flex;position:absolute;top:73px;left:16px;right:16px;z-index:30;background:white;border:1px solid var(--line);border-radius:22px;padding:14px;flex-direction:column;align-items:stretch;box-shadow:0 14px 30px #352a3d1c}.app-menu-button{display:block;border:1px solid var(--line);background:white;border-radius:14px;padding:10px 14px;font-weight:800;min-height:44px}.app-bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);bottom:0;left:0;right:0;z-index:40;background:#fffaf7f5;border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom));backdrop-filter:blur(14px)}.app-bottom-nav a{min-height:54px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;color:#634d70;text-decoration:none}.app-bottom-nav span{font-size:1.45rem;line-height:1}.app-bottom-nav small{font-size:.68rem;font-weight:800}.biology-art{min-height:210px;max-width:260px}.biology-orbit{width:58px;height:58px;font-size:1.8rem}.biology-core{width:75px;height:75px;font-size:3rem}.quick-action{min-height:135px}.hero-shell{border-radius:26px}}
+
+/* Companion navigation: warm, playful, responsive and accessible */
+.app-desktop-nav a[aria-current="page"]{color:#a33d61;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:8px}
+.app-bottom-nav a[aria-current="page"]{color:#a33d61;font-weight:900}
+.app-bottom-nav a[aria-current="page"] span{background:#ffe2e7;border-radius:14px}
+#lab{scroll-margin-top:100px}
+#learning{scroll-margin-top:100px}
+#timeline,#checkins,#appointments,#calendar,#record,#insights,#ask,#prepare,#privacy{scroll-margin-top:100px}
+@media(max-width:640px){.app-bottom-nav a{min-width:0}.app-bottom-nav a small{font-size:.65rem;white-space:nowrap}.app-bottom-nav a span{min-height:30px;display:grid;place-items:center}}
