@@ -1,0 +1,8 @@
+/* Companion navigation: warm, playful, responsive and accessible */
+.app-desktop-nav a[aria-current="page"]{color:#a33d61;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:8px}
+.app-bottom-nav a[aria-current="page"]{color:#a33d61;font-weight:900}
+.app-bottom-nav a[aria-current="page"] span{background:#ffe2e7;border-radius:14px}
+#lab{scroll-margin-top:100px}
+#learning{scroll-margin-top:100px}
+#timeline,#checkins,#appointments,#calendar,#record,#insights,#ask,#prepare,#privacy{scroll-margin-top:100px}
+@media(max-width:640px){.app-bottom-nav a{min-width:0}.app-bottom-nav a small{font-size:.65rem;white-space:nowrap}.app-bottom-nav a span{min-height:30px;display:grid;place-items:center}}
