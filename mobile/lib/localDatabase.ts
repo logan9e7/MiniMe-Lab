@@ -81,6 +81,10 @@ export async function mergeLocalCycles(entries:CycleEntry[],options:{owner_id?:s
  }
  return {added,skipped};
 }
+export async function clearLocalDiary():Promise<void>{
+ const db=await localDatabase();
+ await db.runAsync("DELETE FROM cycle_journal");
+}
 export async function migrateSecureStoreDiary():Promise<number>{
  // Non-destructive migration: legacy entries stay in SecureStore if any operation fails.
  const db=await localDatabase();
