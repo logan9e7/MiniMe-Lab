@@ -6,6 +6,9 @@ on:
     paths:
       - 'mobile/**'
       - '.github/workflows/android-apk.yml'
+concurrency:
+  group: minime-android-preview-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
