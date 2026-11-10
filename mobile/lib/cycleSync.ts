@@ -30,7 +30,7 @@ export async function syncLocalCycles():Promise<SyncReport>{
   if(error){ // Preserve pending item for explicit retry. Never claim partial success silently.
    throw Error(`Uploaded ${report.uploaded} entries; remaining records are pending. ${error.message}`);
   }
-  await markCycleSynced(entry.entry_date,id);
+  await markCycleSynced(entry,id);
   report.uploaded++;dates.add(entry.entry_date);
  }
  return report;
