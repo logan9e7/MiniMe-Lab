@@ -40,5 +40,5 @@ export async function importCloudCycles():Promise<{added:number;skipped:number}>
  const {client,id}=await owner();
  const {data,error}=await client.from("cycle_entries").select("entry_date,flow,pain,notes,period_start").eq("user_id",id).order("entry_date",{ascending:false}).limit(2000);
  if(error)throw error;
- return mergeLocalCycles((data??[]) as CycleEntry[]);
+ return mergeLocalCycles((data??[]) as CycleEntry[],{owner_id:id,dirty:false});
 }
