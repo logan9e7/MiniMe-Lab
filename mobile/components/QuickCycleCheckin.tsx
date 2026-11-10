@@ -2,7 +2,7 @@ import {useState} from "react";
 import {Pressable,StyleSheet,Text,View} from "react-native";
 import {Card} from "./Screen";
 import {localDate} from "../lib/date";
-import {listOfflineCycles,saveOfflineCycle} from "../lib/offlineCycle";
+import {getLocalCycles,putLocalCycle} from "../lib/localDatabase";
 import {theme as c} from "../lib/theme";
 import type {CycleEntry} from "../lib/tracking";
 
@@ -25,9 +25,9 @@ export default function QuickCycleCheckin(){
   setBusy(true);setMessage("");
   try{
    const today=localDate();
-   const existing=(await listOfflineCycles()).find(x=>x.entry_date===today);
+   const existing=(await getLocalCycles()).find(x=>x.entry_date===today);
    if(existing){setMessage("You already logged today. Open Cycle to review your diary; this shortcut will not overwrite it.");return}
-   await saveOfflineCycle({entry_date:today,flow:selection,pain:0,notes:"",period_start:false});
+   await putLocalCycle({entry_date:today,flow:selection,pain:0,notes:"",period_start:false});
    setSelection(null);
    setMessage("Saved privately on this device. You can add pain and notes in Cycle.");
   }catch(e){setMessage(e instanceof Error?e.message:"Unable to save check-in")}
