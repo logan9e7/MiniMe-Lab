@@ -8,10 +8,20 @@
     "userInterfaceStyle": "light",
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      "expo-notifications"
     ],
     "android": {
-      "package": "com.minimelab.companion"
+      "package": "com.minimelab.companion",
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS"
+      ]
     },
     "ios": {
       "bundleIdentifier": "com.minimelab.companion",
