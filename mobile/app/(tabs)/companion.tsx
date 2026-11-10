@@ -1,6 +1,7 @@
 import {useEffect,useState} from "react";
 import {Alert,Text,TextInput,Pressable,View,StyleSheet,ActivityIndicator} from "react-native";
 import {Screen,Card} from "../../components/Screen";
+import DiaryControls from "../../components/DiaryControls";
 import {supabase} from "../../lib/supabase";
 import {theme as c} from "../../lib/theme";
 export default function Companion(){
@@ -63,6 +64,7 @@ export default function Companion(){
  {busy?<ActivityIndicator accessibilityLabel="Working" color={c.rose}/>:null}
  {message?<Text accessibilityRole="alert">{message}</Text>:null}
  </Card>
+ <DiaryControls/>
  <Card tone="mint" title="🗨️ Questions welcome" body="Sexual-health questions deserve evidence-based answers. Explore the original science companion and playful labs from Learn."/>
  <Card tone="lavender" title="Privacy first" body="Your records are account-scoped in Supabase. They are not shared with the AI companion. Cloud records are not end-to-end encrypted.">
  {signed?<Pressable onPress={confirmClear} disabled={busy} style={[s.button,{backgroundColor:"#7c2849"}]}><Text style={s.label}>Delete my tracking records</Text></Pressable>:null}
