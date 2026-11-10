@@ -5,7 +5,7 @@ import {theme as c} from "../lib/theme";
 import {shareEncryptedBackup,restoreEncryptedBackup} from "../lib/cycleBackup";
 import {syncLocalCycles,importCloudCycles} from "../lib/cycleSync";
 import {getReminderEnabled,enableDailyReminder,disableDailyReminder} from "../lib/reminders";
-import {migrateSecureStoreDiary} from "../lib/localDatabase";
+import {migrateSecureStoreDiary,clearLocalDiary} from "../lib/localDatabase";
 export default function DiaryControls(){
  const [passphrase,setPassphrase]=useState(""),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
  const [remind,setRemind]=useState(false),[hour,setHour]=useState("20"),[minute,setMinute]=useState("00");
@@ -41,6 +41,12 @@ export default function DiaryControls(){
   </Card>
   <Card title="Upgrade previous diary" body="If you used an earlier Android preview, copy its protected local entries into the encrypted database without deleting originals.">
    <Pressable disabled={busy} onPress={()=>void run(async()=>`Migrated ${await migrateSecureStoreDiary()} entries. Existing records were preserved.`)} style={s.button}><Text style={s.buttonText}>Import old local entries</Text></Pressable>
+  </Card>
+  <Card title="Delete device diary" body="Permanently delete entries saved in the encrypted local database. This does not delete your cloud account records or legacy SecureStore entries.">
+   <Pressable disabled={busy} style={[s.button,{backgroundColor:"#7c2849"}]} onPress={()=>Alert.alert("Delete device diary?","This permanently deletes all local database entries. Export a backup first. Cloud records and legacy entries will remain.",[
+    {text:"Cancel",style:"cancel"},
+    {text:"Delete local entries",style:"destructive",onPress:()=>void run(async()=>{await clearLocalDiary();return "Local database diary deleted."})}
+   ])}><Text style={s.buttonText}>Delete local diary</Text></Pressable>
   </Card>
   {message?<Text accessibilityRole="alert" style={s.message}>{message}</Text>:null}
  </View>
