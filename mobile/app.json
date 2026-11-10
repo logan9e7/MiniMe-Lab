@@ -3,7 +3,7 @@
     "name": "MiniMe Lab",
     "slug": "logan98",
     "scheme": "minimelab",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "plugins": [
@@ -21,7 +21,9 @@
       "package": "com.minimelab.companion",
       "permissions": [
         "android.permission.POST_NOTIFICATIONS"
-      ]
+      ],
+      "versionCode": 2,
+      "allowBackup": false
     },
     "ios": {
       "bundleIdentifier": "com.minimelab.companion",
