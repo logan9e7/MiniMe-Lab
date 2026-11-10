@@ -63,15 +63,15 @@ export async function deleteLocalCycle(date:string){
 }
 export async function markCycleSynced(date:string,owner_id:string){
  const db=await localDatabase();
- await db.runAsync("UPDATE cycle_journal SET dirty=0, owner_id=? WHERE entry_date=?",owner_id,date);
+ await db.runAsync("UPDATE cycle_journal SET dirty=0, owner_id=? WHERE entry_date=? AND dirty=1",owner_id,date);
 }
-export async function mergeLocalCycles(entries:CycleEntry[]):Promise<{added:number;skipped:number}>{
+export async function mergeLocalCycles(entries:CycleEntry[],options:{owner_id?:string;dirty?:boolean}={}):Promise<{added:number;skipped:number}>{
  const db=await localDatabase();
  let added=0,skipped=0;
  // Never overwrite a local record during backup restore or cloud import.
  for(const entry of entries){
   const e=validateCycle(entry);
-  const result=await db.runAsync("INSERT OR IGNORE INTO cycle_journal(entry_date,flow,pain,notes,period_start,dirty,owner_id) VALUES(?,?,?,?,?,1,NULL)",e.entry_date,e.flow,e.pain,e.notes,e.period_start?1:0);
+  const result=await db.runAsync("INSERT OR IGNORE INTO cycle_journal(entry_date,flow,pain,notes,period_start,dirty,owner_id) VALUES(?,?,?,?,?,?,?)",e.entry_date,e.flow,e.pain,e.notes,e.period_start?1:0,options.dirty===false?0:1,options.owner_id??null);
   if(result.changes)added++;else skipped++;
  }
  return {added,skipped};
