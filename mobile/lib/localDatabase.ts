@@ -61,9 +61,14 @@ export async function deleteLocalCycle(date:string){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw Error("Invalid date");
  const db=await localDatabase();await db.runAsync("DELETE FROM cycle_journal WHERE entry_date=?",date);
 }
-export async function markCycleSynced(date:string,owner_id:string){
+export async function markCycleSynced(entry:CycleEntry,owner_id:string){
  const db=await localDatabase();
- await db.runAsync("UPDATE cycle_journal SET dirty=0, owner_id=? WHERE entry_date=? AND dirty=1",owner_id,date);
+ const e=validateCycle(entry);
+ // Don't mark a newer edit as synced while an older snapshot was being uploaded.
+ await db.runAsync(
+  "UPDATE cycle_journal SET dirty=0, owner_id=? WHERE entry_date=? AND flow=? AND pain=? AND notes=? AND period_start=? AND dirty=1",
+  owner_id,e.entry_date,e.flow,e.pain,e.notes,e.period_start?1:0
+ );
 }
 export async function mergeLocalCycles(entries:CycleEntry[],options:{owner_id?:string;dirty?:boolean}={}):Promise<{added:number;skipped:number}>{
  const db=await localDatabase();
