@@ -1,0 +1,79 @@
+name: Build MiniMe Google Play internal-test AAB
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/google-play-aab.yml'
+      - 'mobile/eas.json'
+permissions:
+  contents: read
+concurrency:
+  group: minime-play-internal-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  android-aab:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_PUBLIC_SUPABASE_URL: https://ipseslbjrzzqutaatdiz.supabase.co
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_3ueSbzBPMC_5tT5-8dhOBA_uOa2NJHi
+      EXPO_PUBLIC_API_URL: https://minime-lab-api.onrender.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Verify Expo access
+        run: |
+          test -n "$EXPO_TOKEN" || { echo "::error::EXPO_TOKEN GitHub secret is required"; exit 1; }
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install and validate app
+        run: |
+          npm ci --no-audit --no-fund
+          npm run typecheck
+          npx --yes expo-doctor
+      - name: Build signed Google Play AAB
+        run: |
+          export EAS_NO_VCS=1
+          eas build --platform android --profile play-internal --non-interactive --wait --json > "$RUNNER_TEMP/eas-play.json"
+      - name: Download and inspect AAB
+        shell: bash
+        run: |
+          node - "$RUNNER_TEMP/eas-play.json" "$RUNNER_TEMP/aab-url.txt" <<'NODE'
+          const fs=require("fs");
+          const [src,dest]=process.argv.slice(2);
+          const raw=fs.readFileSync(src,"utf8");
+          const start=raw.search(/[\[{]/);
+          if(start<0)throw Error("EAS did not return JSON");
+          const parsed=JSON.parse(raw.slice(start));
+          const build=Array.isArray(parsed)?parsed[0]:parsed;
+          if(build.status!=="FINISHED"||!build.artifacts?.buildUrl)throw Error("EAS AAB build not finished; check EAS logs");
+          fs.writeFileSync(dest,build.artifacts.buildUrl);
+          NODE
+          url="$(cat "$RUNNER_TEMP/aab-url.txt")"
+          case "$url" in https://*) ;; *) echo "Invalid AAB URL"; exit 1;; esac
+          curl --fail --location --retry 3 --output "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab" "$url"
+          test -s "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab"
+          unzip -t "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab" | tail -n 2
+          sha256sum "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab" > "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.sha256"
+          cat "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.sha256"
+      - name: Upload Play Console artifact (manual upload only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiniMe-Lab-Play-Internal-AAB
+          path: |
+            ${{ runner.temp }}/MiniMe-Lab-Play-Internal.aab
+            ${{ runner.temp }}/MiniMe-Lab-Play-Internal.sha256
+          retention-days: 30
+      - name: Print EAS diagnostics if build fails
+        if: failure()
+        run: eas build:list --platform android --limit 3 --non-interactive --json || true
