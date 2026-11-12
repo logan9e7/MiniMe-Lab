@@ -36,32 +36,22 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
       - name: Install and validate app
         run: |
           npm ci --no-audit --no-fund
           npm run typecheck
           npx --yes expo-doctor
-      - name: Build signed Google Play AAB
+      - name: Build signed Google Play AAB locally (no EAS cloud quota)
         run: |
           export EAS_NO_VCS=1
-          eas build --platform android --profile play-internal --non-interactive --wait --json > "$RUNNER_TEMP/eas-play.json"
-      - name: Download and inspect AAB
+          eas build --platform android --profile play-internal --local --non-interactive --output "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab"
+      - name: Inspect AAB
         shell: bash
         run: |
-          node - "$RUNNER_TEMP/eas-play.json" "$RUNNER_TEMP/aab-url.txt" <<'NODE'
-          const fs=require("fs");
-          const [src,dest]=process.argv.slice(2);
-          const raw=fs.readFileSync(src,"utf8");
-          const start=raw.search(/[\[{]/);
-          if(start<0)throw Error("EAS did not return JSON");
-          const parsed=JSON.parse(raw.slice(start));
-          const build=Array.isArray(parsed)?parsed[0]:parsed;
-          if(build.status!=="FINISHED"||!build.artifacts?.buildUrl)throw Error("EAS AAB build not finished; check EAS logs");
-          fs.writeFileSync(dest,build.artifacts.buildUrl);
-          NODE
-          url="$(cat "$RUNNER_TEMP/aab-url.txt")"
-          case "$url" in https://*) ;; *) echo "Invalid AAB URL"; exit 1;; esac
-          curl --fail --location --retry 3 --output "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab" "$url"
           test -s "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab"
           unzip -t "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab" | tail -n 2
           sha256sum "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.aab" > "$RUNNER_TEMP/MiniMe-Lab-Play-Internal.sha256"
@@ -74,6 +64,9 @@ jobs:
             ${{ runner.temp }}/MiniMe-Lab-Play-Internal.aab
             ${{ runner.temp }}/MiniMe-Lab-Play-Internal.sha256
           retention-days: 30
-      - name: Print EAS diagnostics if build fails
+      - name: Print local build environment on failure
         if: failure()
-        run: eas build:list --platform android --limit 3 --non-interactive --json || true
+        run: |
+          java -version
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+          echo "Local EAS build requires Android SDK and access to existing EAS upload keystore."
