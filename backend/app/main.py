@@ -17,7 +17,8 @@ from app.modules.genetics.router import router as genetics_router
 def create_app() -> FastAPI:
     app = FastAPI(title="MiniMe Lab", version="0.3.0", docs_url="/docs", redoc_url=None)
     app.add_middleware(CORSMiddleware, allow_origins=allowed_origins(),
-                       allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
+                       allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+                       allow_headers=["Content-Type", "Authorization"])
 
     @app.middleware("http")
     async def security_headers(request, call_next):
