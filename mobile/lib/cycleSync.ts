@@ -1,6 +1,7 @@
 import {supabase} from "./supabase";
 import {getLocalCycles,markCycleSynced,mergeLocalCycles} from "./localDatabase";
 import type {CycleEntry} from "./tracking";
+import {sameCycle,pendingBatches} from "./cycleSyncCore";
 
 async function owner(){
  if(!supabase)throw Error("Cloud sync is not configured.");
@@ -14,11 +15,7 @@ export type SyncReport={
  conflicts:number;
  skippedOtherAccount:number;
 };
-export function sameCycle(a:CycleEntry,b:CycleEntry):boolean{
- return a.entry_date===b.entry_date&&a.flow===b.flow&&a.pain===b.pain
-  &&a.notes===b.notes&&a.period_start===b.period_start;
-}
-const batchSize=100;
+
 /** Explicit foreground-only sync. Never overwrites remote or locally newer edits.
  * Identical same-date entries are acknowledged; divergent entries remain dirty.
  * Queries only pending dates in bounded chunks to avoid Supabase row-limit drift.
@@ -33,8 +30,7 @@ export async function syncLocalCycles():Promise<SyncReport>{
  });
  if(!eligible.length)return report;
  const remoteByDate=new Map<string,CycleEntry>();
- for(let start=0;start<eligible.length;start+=batchSize){
-  const chunk=eligible.slice(start,start+batchSize);
+ for(const chunk of pendingBatches(eligible)){
   const {data,error}=await client.from("cycle_entries")
    .select("entry_date,flow,pain,notes,period_start")
    .eq("user_id",id).in("entry_date",chunk.map(entry=>entry.entry_date));
