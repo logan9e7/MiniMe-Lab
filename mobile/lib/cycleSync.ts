@@ -45,8 +45,8 @@ export async function syncLocalCycles():Promise<SyncReport>{
   const remote=remoteByDate.get(entry.entry_date);
   if(remote){
    if(sameCycle(entry,remote)){
-    await markCycleSynced(entry,id);
-    report.alreadyOnServer++;
+    if(await markCycleSynced(entry,id))report.alreadyOnServer++;
+    else report.conflicts++;
    }else{
     report.conflicts++;
    }
@@ -66,8 +66,8 @@ export async function syncLocalCycles():Promise<SyncReport>{
     if(readError)throw Error(`Unable to resolve cloud duplicate: ${readError.message}`);
     if(competing){
      if(sameCycle(entry,competing as CycleEntry)){
-      await markCycleSynced(entry,id);
-      report.alreadyOnServer++;
+      if(await markCycleSynced(entry,id))report.alreadyOnServer++;
+      else report.conflicts++;
      }else report.conflicts++;
      continue;
     }
