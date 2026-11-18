@@ -1,6 +1,9 @@
 """Source-grounded biology discovery. No paid LLM or medical personalization."""
 from datetime import datetime, timezone
-from functools import lru_cache
+from functools import wraps
+from threading import Lock
+from time import monotonic
+from cachetools import TTLCache
 from html import unescape
 import re
 from urllib.parse import urlencode
@@ -8,6 +11,29 @@ from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 import json
 from fastapi import APIRouter, HTTPException, Query
+
+def ttl_cache_nonempty(ttl=3600, timer=None):
+    """Cache only nonempty successful fetches; TTL guarantees eventual refresh."""
+    def decorate(loader):
+        cache = TTLCache(maxsize=32, ttl=ttl, timer=timer or monotonic)
+        lock = Lock()
+        @wraps(loader)
+        def cached(topic):
+            with lock:
+                if topic in cache:
+                    return cache[topic]
+            # Let upstream errors propagate; never cache failures or empty responses.
+            result = loader(topic)
+            if result:
+                with lock:
+                    cache[topic] = result
+            return result
+        def cache_clear():
+            with lock:
+                cache.clear()
+        cached.cache_clear = cache_clear
+        return cached
+    return decorate
 
 router = APIRouter(prefix="/api/discover", tags=["Science discovery"])
 TOPICS = {
@@ -27,7 +53,7 @@ QUESTIONS = [
 def clean(value):
     return re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", value or ""))).strip()
 
-@lru_cache(maxsize=32)
+@ttl_cache_nonempty()
 def medline(topic):
     params = urlencode({"db": "healthTopics", "term": TOPICS[topic], "retmax": 6, "rettype": "brief", "tool": "MiniMeLab"})
     request = Request("https://wsearch.nlm.nih.gov/ws/query?" + params, headers={"User-Agent": "MiniMeLab/1.0"})
@@ -42,7 +68,7 @@ def medline(topic):
         articles.append({"title": clean(parts.get("title")), "summary": clean(parts.get("snippet") or parts.get("FullSummary"))[:420], "url": url, "source": "MedlinePlus"})
     return articles
 
-@lru_cache(maxsize=32)
+@ttl_cache_nonempty()
 def publications(topic):
     query = TOPICS[topic] + " AND (REVIEW_TYPE:review)"
     params = urlencode({"query": query, "format": "json", "pageSize": 5, "resultType": "lite"})
