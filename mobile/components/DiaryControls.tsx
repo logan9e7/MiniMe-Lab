@@ -29,9 +29,9 @@ export default function DiaryControls(){
     <Pressable disabled={busy} onPress={()=>void restore()} style={s.button}><Text style={s.buttonText}>Restore backup</Text></Pressable>
    </View>
   </Card>
-  <Card tone="mint" title="☁️ Manual cloud sync" body="Nothing uploads automatically. Sign in before syncing. If a date exists in both places, your local record stays pending and the cloud record is never overwritten.">
+  <Card tone="mint" title="☁️ Manual cloud sync" body="Nothing uploads automatically. Sign in before syncing. Matching dates with identical contents are marked synced. Differing records remain pending as conflicts; no cloud record is overwritten.">
    <View style={s.row}>
-    <Pressable disabled={busy} onPress={()=>void run(async()=>{const r=await syncLocalCycles();return `Uploaded ${r.uploaded}. Conflicts ${r.alreadyOnServer}. Other-account entries ${r.skippedOtherAccount}.`})} style={s.button}><Text style={s.buttonText}>Upload pending</Text></Pressable>
+    <Pressable disabled={busy} onPress={()=>void run(async()=>{const r=await syncLocalCycles();return `Uploaded ${r.uploaded}. Already synced ${r.alreadyOnServer}. Conflicts ${r.conflicts}. Other-account entries ${r.skippedOtherAccount}.`})} style={s.button}><Text style={s.buttonText}>Upload pending</Text></Pressable>
     <Pressable disabled={busy} onPress={()=>void run(async()=>{const r=await importCloudCycles();return `Imported ${r.added}, skipped ${r.skipped} existing dates.`})} style={s.button}><Text style={s.buttonText}>Import cloud</Text></Pressable>
    </View>
   </Card>
