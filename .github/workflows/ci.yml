@@ -17,6 +17,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m compileall -q app
       - run: python -m pytest -q
+      - run: pytest -q  # Verify direct invocation resolves app imports too
       - run: python -m unittest discover -s cpp -p "test_*.py"
   frontend:
     runs-on: ubuntu-latest
