@@ -35,7 +35,9 @@ export async function createEncryptedBackup(password:string):Promise<string>{
 export async function shareEncryptedBackup(password:string):Promise<number>{
  const body=await createEncryptedBackup(password);
  if(!await Sharing.isAvailableAsync())throw Error("File sharing is unavailable on this device");
- const file=(FileSystem.cacheDirectory??FileSystem.documentDirectory)+"minime-cycle-backup-"+Date.now()+".minime";
+ const dir=FileSystem.cacheDirectory??FileSystem.documentDirectory;
+ if(!dir)throw Error("No writable directory available for cycle backup.");
+ const file=`${dir}minime-cycle-backup-${Date.now()}.minime-backup.json`;
  await FileSystem.writeAsStringAsync(file,body,{encoding:FileSystem.EncodingType.UTF8});
  try{await Sharing.shareAsync(file,{mimeType:"application/octet-stream",dialogTitle:"Save encrypted MiniMe backup"});}
  finally{await FileSystem.deleteAsync(file,{idempotent:true})}
