@@ -8,7 +8,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:sync": "node --experimental-strip-types --test lib/cycleSyncCore.test.mjs"
   },
   "dependencies": {
     "expo": "~54.0.0",
