@@ -1,0 +1,39 @@
+name: Publish existing MiniMe APK artifact to GitHub Release
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful APK build run ID containing MiniMe-Lab-Android-APK artifact"
+        required: true
+        default: "44557920403"
+        type: string
+      release_tag:
+        description: "New GitHub prerelease tag"
+        required: true
+        default: "android-preview-0.2.0-fixed"
+        type: string
+permissions:
+  actions: read
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Download already-built APK (no rebuild)
+        run: |
+          mkdir -p "$RUNNER_TEMP/apk"
+          gh run download "${{ inputs.source_run_id }}" --repo "$GITHUB_REPOSITORY" --name MiniMe-Lab-Android-APK --dir "$RUNNER_TEMP/apk"
+          test -s "$RUNNER_TEMP/apk/MiniMe-Lab-Android.apk"
+          (cd "$RUNNER_TEMP/apk" && sed 's@  .*@  MiniMe-Lab-Android.apk@' MiniMe-Lab-Android.sha256 | sha256sum --check)
+      - name: Publish signed APK as GitHub prerelease
+        run: |
+          sha="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/${{ inputs.source_run_id }}" --jq '.head_sha')"
+          test -n "$sha"
+          gh release create "${{ inputs.release_tag }}" \
+            "$RUNNER_TEMP/apk/MiniMe-Lab-Android.apk#MiniMe Lab Android APK" \
+            "$RUNNER_TEMP/apk/MiniMe-Lab-Android.sha256#SHA256 checksum" \
+            --repo "$GITHUB_REPOSITORY" --target "$sha" --prerelease \
+            --title "MiniMe Lab Android 0.2.0 (fixed)" \
+            --notes "Native Android preview from source commit $sha. Physical-device validation remains pending; not a medical device."
