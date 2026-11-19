@@ -38,50 +38,36 @@ jobs:
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
-      - name: Generate reproducible npm lockfile for EAS
-        run: |
-          npm install --package-lock-only --no-audit --no-fund
-          npm ci --include=dev --no-audit --no-fund
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install reproducible dependencies
+        run: npm ci --include=dev --no-audit --no-fund
       - name: Validate Expo dependency compatibility
         run: npx --yes expo-doctor
-      - name: Typecheck
-        run: npm run typecheck
-      - name: Build Android preview APK with EAS
+      - name: Typecheck and sync regression tests
+        run: |
+          npm run typecheck
+          npm run test:sync
+      - name: Build Android preview APK locally (no EAS cloud quota)
         run: |
           export EAS_NO_VCS=1
-          eas build --platform android --profile preview --non-interactive --wait --json > "$RUNNER_TEMP/eas-build.json"
-      - name: Print Expo build diagnostics on failure
-        if: failure()
+          eas build --platform android --profile preview --local --non-interactive --output "$RUNNER_TEMP/MiniMe-Lab-Android.apk"
+      - name: Verify APK and record checksum
         run: |
-          echo "Recent EAS Android builds:"
-          eas build:list --platform android --limit 3 --non-interactive --json || true
-          echo "Open the build URL above and inspect the failed phase logs."
-      - name: Download APK from completed EAS build
-        shell: bash
-        run: |
-          node - "$RUNNER_TEMP/eas-build.json" "$RUNNER_TEMP/apk-url.txt" <<'NODE'
-          const fs=require("fs");
-          const [src,dest]=process.argv.slice(2);
-          const raw=fs.readFileSync(src,"utf8");
-          const start=raw.search(/[\[{]/);
-          if(start<0)throw Error("EAS build output was not JSON: check build logs.");
-          const result=JSON.parse(raw.slice(start));
-          const build=Array.isArray(result)?result[0]:result;
-          if(build.status!=="FINISHED"||!build.artifacts?.buildUrl)throw Error("No completed Android APK artifact returned by EAS");
-          fs.writeFileSync(dest,build.artifacts.buildUrl);
-          NODE
-          url="$(cat "$RUNNER_TEMP/apk-url.txt")"
-          case "$url" in https://*) ;; *) echo "Invalid APK URL"; exit 1;; esac
-          curl --fail --location --retry 3 --output "$RUNNER_TEMP/MiniMe-Lab-Android.apk" "$url"
           test -s "$RUNNER_TEMP/MiniMe-Lab-Android.apk"
           file "$RUNNER_TEMP/MiniMe-Lab-Android.apk"
+          unzip -t "$RUNNER_TEMP/MiniMe-Lab-Android.apk" | tail -n 2
+          sha256sum "$RUNNER_TEMP/MiniMe-Lab-Android.apk" > "$RUNNER_TEMP/MiniMe-Lab-Android.sha256"
+          cat "$RUNNER_TEMP/MiniMe-Lab-Android.sha256"
       - name: Upload APK as workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: MiniMe-Lab-Android-APK
-          path: ${{ runner.temp }}/MiniMe-Lab-Android.apk
+          path: |
+            ${{ runner.temp }}/MiniMe-Lab-Android.apk
+            ${{ runner.temp }}/MiniMe-Lab-Android.sha256
           retention-days: 30
       - name: Attach APK to GitHub prerelease
         shell: bash
@@ -90,4 +76,4 @@ jobs:
           gh release create "$tag" "$RUNNER_TEMP/MiniMe-Lab-Android.apk#MiniMe Lab Android APK" \
             --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
             --title "MiniMe Lab Android preview #${GITHUB_RUN_NUMBER}" \
-            --notes "Preview APK from Expo EAS. For testing only; not a production medical app."
+            --notes "Preview APK from local EAS build. Source commit: $GITHUB_SHA. For testing only; physical-device and clinical validation are incomplete."
